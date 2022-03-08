@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">bboxPhotoApp</string>
+    <string name="app_name">Photo Capture App</string>
+    <string name="btn_btnFloating">Take Photo</string>
 </resources>
