@@ -3,11 +3,10 @@ package com.example.bboxphotoapp;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -16,9 +15,9 @@ import androidx.camera.view.PreviewView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.io.IOException;
-
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     private FloatingActionButton btnFloating;
     private ImageButton btnImage;
@@ -51,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        JSONManager.initJSON(this);
+
         // initialize camera controller object
         cc = new CameraController(this);
 
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns the URI for the first image in MediaStore
+     * Returns the URI for the first (head) image in MediaStore storage
      *
      * @return image URI; null otherwise
      */
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         // how the query is sorted
         String sortOrder = MediaStore.Images.Media.DEFAULT_SORT_ORDER;
 
+        // query all MediaStore images
         Cursor cursor = getContentResolver().query(
                 uri,
                 projection,
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 sortOrder);
 
+        // return first image (head)
         if(cursor != null) {
             cursor.moveToFirst();
 

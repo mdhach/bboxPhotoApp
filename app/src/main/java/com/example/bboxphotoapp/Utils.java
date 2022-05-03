@@ -2,21 +2,26 @@ package com.example.bboxphotoapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
-import android.provider.MediaStore;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
+
 public final class Utils {
 
-    // constants
+    // permissions
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final String[] STORAGE_PERMISSION = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    // request codes
     private static final int CAMERA_REQUEST_CODE = 10;
     private static final int STORAGE_REQUEST_CODE = 20;
 
@@ -80,5 +85,4 @@ public final class Utils {
         Activity activity = getActivity(context);
         ActivityCompat.requestPermissions(activity, STORAGE_PERMISSION, STORAGE_REQUEST_CODE);
     }
-
 }

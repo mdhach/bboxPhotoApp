@@ -3,8 +3,11 @@ package com.example.bboxphotoapp;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,16 +18,28 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 
 public class CameraController {
+
+    private static final String TAG = "CameraController";
 
     private Context context;
     private PreviewView previewView;
@@ -44,13 +59,13 @@ public class CameraController {
     }
 
     private void startCamera() {
-        // create camera singleton
+        // create camera instance
         cameraProviderFuture = ProcessCameraProvider.getInstance(this.context);
 
         // add camera listener
         cameraProviderFuture.addListener(() -> {
             try {
-                // check for camera instance and bind it to a preview
+                // get camera instance and bind it to a preview
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindPreview(cameraProvider);
             } catch(Exception e) {
@@ -91,25 +106,34 @@ public class CameraController {
         imageCapture.takePicture(getOutputOptions(),
                 ContextCompat.getMainExecutor(this.activity),
                 new ImageCapture.OnImageSavedCallback() {
+
             @Override
             public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+                JSONManager.saveToJSON(context, outputFileResults.getSavedUri());
+                JSONManager.verifyJSON(context);
+                // toast notification on image capture success
                 Toast.makeText(context,
                         "Image saved",
                         Toast.LENGTH_SHORT).show();
+
             }
+
             @Override
             public void onError(ImageCaptureException error) {
                 error.printStackTrace();
+
+                // toast notification on image capture failure
                 Toast.makeText(context,
                         "Error: Picture could not be saved/taken.",
                         Toast.LENGTH_SHORT).show();
+
             }
         });
     }
 
     private ImageCapture.OutputFileOptions getOutputOptions() {
         // output image name; current date and time
-        String outputName = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+        String outputName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
                 Locale.getDefault()).format(new Date());
 
         // MediaStore values
