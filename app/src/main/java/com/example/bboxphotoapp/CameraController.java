@@ -110,7 +110,7 @@ public class CameraController {
             @Override
             public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
                 JSONManager.saveToJSON(context, outputFileResults.getSavedUri());
-                JSONManager.verifyJSON(context);
+
                 // toast notification on image capture success
                 Toast.makeText(context,
                         "Image saved",

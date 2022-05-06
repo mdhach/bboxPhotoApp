@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Photo Capture App</string>
     <string name="btn_btnFloating">Take Photo</string>
+    <string name="btn_btnImage">Edit Photos</string>
 </resources>

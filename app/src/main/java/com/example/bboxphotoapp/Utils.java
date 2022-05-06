@@ -17,6 +17,8 @@ import java.io.File;
 
 public final class Utils {
 
+    private static final String TAG = "Utils";
+
     // permissions
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final String[] STORAGE_PERMISSION = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};

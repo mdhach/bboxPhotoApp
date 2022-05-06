@@ -25,16 +25,17 @@ import java.util.Arrays;
  * Bounding box standard dimensions:
  *
  *          int[][];
- *          represents 4 points as cartesian coordinates
+ *          represents 2 points as cartesian coordinates to draw a bounding box;
+ *          upper-left and bottom-right
  *
  *          Ex.: [[15,12],
- *                [15,90],
- *                [144, 12],
  *                [144, 90]]
  */
 public class ImageObject {
 
     private static final String TAG = "ImageObject";
+    private final int ROWS = 2; // the total # of rows within the bounding box
+    private final int COLS = 2; // the total # of columns within the bounding box
 
     public String imageName; // display name of image
     public String imageUri; // uri of image
@@ -42,7 +43,7 @@ public class ImageObject {
 
     // used for classification; defined by user
     public String imageClass; // classification name; default null
-    public int[][] imageBbox; // 4 points that draw a box; default null
+    public int[][] imageBbox; // 2 points that draw a box; default null
 
     /**
      * Creates an image object.
@@ -50,7 +51,7 @@ public class ImageObject {
      * @param name the display name of a given image
      * @param uri the uri of a given image
      * @param className classification name of a given image
-     * @param bbox bounding box cartesian coordinates of a given image (dim: (4, 2)))
+     * @param bbox bounding box cartesian coordinates of a given image (dim: (2, 2)))
      */
     public ImageObject(String name, String uri, String className, int[][] bbox) {
         this.imageName = name;
@@ -60,9 +61,9 @@ public class ImageObject {
 
         // check bounding box dimension requirements; sets to null otherwise
         if(bbox != null) {
-            int rows = bbox.length;
-            int columns = bbox[0].length;
-            this.imageBbox = (rows == 4 && columns == 2) ? bbox : null;
+            int r = bbox.length;
+            int c = bbox[0].length;
+            this.imageBbox = (r == ROWS && c == COLS) ? bbox : null;
         }
     }
 
@@ -90,23 +91,23 @@ public class ImageObject {
     /**
      * Sets the bounding box coordinates of the image
      *
-     * @param bbox coordinates (must be 4 by 2)
+     * @param bbox coordinates (must be 2 by 2)
      */
     public void setImageBbox(int[][] bbox) {
         if(bbox != null) {
-            int rows = bbox.length;
-            int columns = bbox[0].length;
-            this.imageBbox = (rows == 4 && columns == 2) ? bbox : null;
+            int r = bbox.length;
+            int c = bbox[0].length;
+            this.imageBbox = (r == ROWS && c == COLS) ? bbox : null;
         }
     }
 
     /**
      * Sets the coordinate of an index in within the image bounding box.
      *
-     * @param index the index of a bbox coordinate (0-3) to set
-     * @param newCoordinate the new coordinates
+     * @param index 0: upper-left, 1: bottom-right
+     * @param newCoordinate (x, y); new coordinates
      */
-    public void setBboxCoordinate(int index, int[] newCoordinate) {
+    public void setIndexCoordinate(int index, int[] newCoordinate) {
         this.imageBbox[index][0] = newCoordinate[0];
         this.imageBbox[index][1] = newCoordinate[1];
     }

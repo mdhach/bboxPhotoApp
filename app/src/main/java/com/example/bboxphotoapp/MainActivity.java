@@ -1,19 +1,21 @@
 package com.example.bboxphotoapp;
 
-import android.content.ContentUris;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,7 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
     private FloatingActionButton btnFloating;
     private ImageButton btnImage;
+    private ImageView imgViewTopLeft;
+    private ImageView imgViewBottomRight;
+
     private PreviewView previewView;
+    private BboxView bboxView;
     private CameraController cc;
 
     @Override
@@ -29,7 +35,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // views
         previewView = findViewById(R.id.previewView);
+        bboxView = findViewById(R.id.bboxView);
+
+        // adjustment indicators
+        imgViewTopLeft = findViewById(R.id.imgViewTopLeft);
+        imgViewBottomRight = findViewById(R.id.imgViewBottomRight);
+
+        // init adjustment indicator locations after bboxView initializes dimensions
+        bboxView.post(() -> {
+            // image dims
+            int imgWidth = imgViewTopLeft.getWidth() / 2;
+            int imgHeight = imgViewTopLeft.getHeight() / 2;
+
+            // bbox dims
+            int[] topLeft = bboxView.getTopLeft();
+            int[] bottomRight = bboxView.getBottomRight();
+
+            // set top left coordinates
+            imgViewTopLeft.setX(topLeft[0] - imgWidth);
+            imgViewTopLeft.setY(topLeft[1] - imgHeight);
+
+            // set bottom right coordinates
+            imgViewBottomRight.setX(bottomRight[0] - imgWidth);
+            imgViewBottomRight.setY(bottomRight[1] - imgHeight);
+        });
+
+        // init buttons
         btnFloating = findViewById(R.id.btnFloating);
         btnImage = findViewById(R.id.btnImage);
 
@@ -43,59 +76,20 @@ public class MainActivity extends AppCompatActivity {
             Utils.requestCameraPermissions(this);
         }
 
+        // initialize JSON object if it exists in storage
+        JSONManager.initJSON(this);
+
+        // try to set preview image for edit button
         try{
-            // set preview image for edit button
-            this.btnImage.setImageURI(getHeadImageUri());
+            this.btnImage.setImageURI(JSONManager.getHeadImageUri());
         } catch(Exception e) {
             e.printStackTrace();
         }
 
-        JSONManager.initJSON(this);
-
         // initialize camera controller object
         cc = new CameraController(this);
 
-        // floating button action
+        // set listener on floating action button
         btnFloating.setOnClickListener(view -> cc.takePhoto());
-    }
-
-    /**
-     * Returns the URI for the first (head) image in MediaStore storage
-     *
-     * @return image URI; null otherwise
-     */
-    private Uri getHeadImageUri() {
-        Uri head = null;
-
-        // columns to retrieve
-        String[] projection = {MediaStore.Images.Media._ID};
-
-        // the uri path to the primary external storage volume
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        // how the query is sorted
-        String sortOrder = MediaStore.Images.Media.DEFAULT_SORT_ORDER;
-
-        // query all MediaStore images
-        Cursor cursor = getContentResolver().query(
-                uri,
-                projection,
-                null,
-                null,
-                sortOrder);
-
-        // return first image (head)
-        if(cursor != null) {
-            cursor.moveToFirst();
-
-            head = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    cursor.getInt(
-                            cursor.getColumnIndexOrThrow(
-                                    MediaStore.Images.Media._ID)));
-
-            cursor.close();
-        }
-        return head;
     }
 }

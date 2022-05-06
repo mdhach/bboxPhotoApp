@@ -34,6 +34,9 @@ public final class JSONManager {
     private static File dir; // JSON file path
     private static File JSONFile; // local JSON file
 
+    // arbitrary value
+    private static Uri headImageUri;
+
     /**
      * Retrieves, if exists, the local main JSON file and initializes it.
      *
@@ -100,11 +103,7 @@ public final class JSONManager {
 
         // query all MediaStore images
         Cursor cursor = context.getContentResolver().query(
-                uri,
-                projection,
-                null,
-                null,
-                sortOrder);
+                uri, projection, null, null, sortOrder);
 
         // iterates through all MediaStore images
         while(cursor.moveToNext()) {
@@ -113,6 +112,10 @@ public final class JSONManager {
                     cursor.getInt(
                             cursor.getColumnIndexOrThrow(
                                     MediaStore.Images.Media._ID)));
+
+            // stores the uri of the first image.
+            // used as the preview image for btnImage in Main
+            if(headImageUri == null) { headImageUri = id; }
 
             file = new File(id.getPath()); // store file at the uri path
             keys.add(file.getName()); // add the ID of the file to the keys list
@@ -140,7 +143,7 @@ public final class JSONManager {
      */
     public static void saveToJSON(Context context, Uri uri) {
         try{
-            int[][] arr = new int[4][2];
+            int[][] arr = new int[2][2]; // placeholder
 
             String name = getImageName(context, uri);
             String id = uri.getLastPathSegment();
@@ -166,7 +169,7 @@ public final class JSONManager {
      * Emulator path: data/data/app_name
      */
     public static void saveJSONAsFile() {
-        String jsonToStr = JSONMain.toString();
+        String jsonToStr = JSONMain.toString(); // converts JSONMain to string format
         try {
             FileWriter fw = new FileWriter(JSONFile); // write character file: JSONFile
             BufferedWriter bw = new BufferedWriter(fw); // write file as char-input stream
@@ -174,7 +177,6 @@ public final class JSONManager {
             bw.close(); // close BufferedWriter object
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(TAG, "saveJSON: IOException");
         }
     }
 
@@ -201,6 +203,13 @@ public final class JSONManager {
         }
         return imageName;
     }
+
+    /**
+     * Returns the uri of the first image indexed by the JSON verification process.
+     *
+     * @return uri of the first image indexed
+     */
+    public static Uri getHeadImageUri() { return headImageUri; }
 
     /**
      * Returns main JSON file as JSONObject.
