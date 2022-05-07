@@ -34,7 +34,7 @@ public final class JSONManager {
     private static File dir; // JSON file path
     private static File JSONFile; // local JSON file
 
-    // arbitrary value
+    // arbitrary value used to preview an image
     private static Uri headImageUri;
 
     /**
@@ -141,15 +141,13 @@ public final class JSONManager {
      *
      * @param uri uri of image to save
      */
-    public static void saveToJSON(Context context, Uri uri) {
+    public static void saveToJSON(Context context, Uri uri, int[] bbox) {
         try{
-            int[][] arr = new int[2][2]; // placeholder
-
             String name = getImageName(context, uri);
             String id = uri.getLastPathSegment();
 
             // init imageJSON and get main JSON object
-            ImageObject imageObject = new ImageObject(name, uri.toString(), "Person", arr);
+            ImageObject imageObject = new ImageObject(name, uri.toString(), "Person", bbox);
             JSONObject imageJSON = imageObject.getImageJSON();
 
             // append ImageObject to JSONMain as imageJSON
@@ -157,6 +155,8 @@ public final class JSONManager {
 
             // save/overwrite local JSON file: JSONMain
             saveJSONAsFile();
+
+            Log.d(TAG, "Image saved with parameters: " + imageObject);
         } catch(JSONException e) {
             e.printStackTrace();
         }

@@ -24,12 +24,11 @@ import java.util.Arrays;
  *
  * Bounding box standard dimensions:
  *
- *          int[][];
+ *          int[];
  *          represents 2 points as cartesian coordinates to draw a bounding box;
  *          upper-left and bottom-right
  *
- *          Ex.: [[15,12],
- *                [144, 90]]
+ *          Ex.: [15, 12, 144, 90]
  */
 public class ImageObject {
 
@@ -43,7 +42,7 @@ public class ImageObject {
 
     // used for classification; defined by user
     public String imageClass; // classification name; default null
-    public int[][] imageBbox; // 2 points that draw a box; default null
+    public int[] imageBbox; // 2 points that draw a box; length 4; default null
 
     /**
      * Creates an image object.
@@ -51,20 +50,16 @@ public class ImageObject {
      * @param name the display name of a given image
      * @param uri the uri of a given image
      * @param className classification name of a given image
-     * @param bbox bounding box cartesian coordinates of a given image (dim: (2, 2)))
+     * @param bbox bounding box cartesian coordinates of a given image (dim: int[4])
      */
-    public ImageObject(String name, String uri, String className, int[][] bbox) {
+    public ImageObject(String name, String uri, String className, int[] bbox) {
         this.imageName = name;
         this.imageUri = uri;
         this.imageClass = className;
         this.imageJSON = new JSONObject();
 
         // check bounding box dimension requirements; sets to null otherwise
-        if(bbox != null) {
-            int r = bbox.length;
-            int c = bbox[0].length;
-            this.imageBbox = (r == ROWS && c == COLS) ? bbox : null;
-        }
+        this.imageBbox = (bbox != null && bbox.length == 4) ? bbox : null;
     }
 
     /**
@@ -93,23 +88,8 @@ public class ImageObject {
      *
      * @param bbox coordinates (must be 2 by 2)
      */
-    public void setImageBbox(int[][] bbox) {
-        if(bbox != null) {
-            int r = bbox.length;
-            int c = bbox[0].length;
-            this.imageBbox = (r == ROWS && c == COLS) ? bbox : null;
-        }
-    }
-
-    /**
-     * Sets the coordinate of an index in within the image bounding box.
-     *
-     * @param index 0: upper-left, 1: bottom-right
-     * @param newCoordinate (x, y); new coordinates
-     */
-    public void setIndexCoordinate(int index, int[] newCoordinate) {
-        this.imageBbox[index][0] = newCoordinate[0];
-        this.imageBbox[index][1] = newCoordinate[1];
+    public void setImageBbox(int[] bbox) {
+        this.imageBbox = (bbox != null && bbox.length == 4) ? bbox : null;
     }
 
     /**
@@ -138,7 +118,7 @@ public class ImageObject {
      *
      * @return the image bounding box coordinates
      */
-    public int[][] getImageBbox() { return this.imageBbox; }
+    public int[] getImageBbox() { return this.imageBbox; }
 
     /**
      * Appends field information to local JSONObject and returns it.
@@ -160,13 +140,13 @@ public class ImageObject {
 
     @Override
     public String toString() {
-        String toString = "Name: " + this.imageName + "| Uri: " + this.imageUri;
+        String str = "Name: " + this.imageName + "| Uri: " + this.imageUri;
 
         if(this.imageClass != null && this.imageBbox != null) {
-            return toString + "| Class Name: " + this.imageClass
-                    + "| Bounding Box: " + Arrays.deepToString(this.imageBbox);
+            return str + "| Class Name: " + this.imageClass
+                    + "| Bounding Box: " + Arrays.toString(this.imageBbox);
         }
 
-        return toString;
+        return str;
     }
 }

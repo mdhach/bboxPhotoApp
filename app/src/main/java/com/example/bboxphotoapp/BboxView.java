@@ -16,9 +16,11 @@ public class BboxView extends AppCompatImageView {
 
     private static final String TAG = "BboxView";
 
+    // objects for drawing and coloring the bounding box
     private Paint paint;
     private Rect rect;
 
+    // thickness of the bounding box
     private int strokeWidth = 3;
 
     // bbox dimensions
@@ -76,19 +78,41 @@ public class BboxView extends AppCompatImageView {
         setBottomRight((int)(w * 0.75), (int)(h * 0.75));
     }
 
+    /**
+     * Sets the top left coordinate of the bounding box.
+     *
+     * @param x the x coordinate of the top left point
+     * @param y the y coordinate of the top left point
+     */
     public void setTopLeft(int x, int y) {
         this.topLeft[0] = x;
         this.topLeft[1] = y;
         postInvalidate();
     }
 
+    /**
+     * Sets the bottom right coordinate of the bounding box.
+     *
+     * @param x the x coordinate of the bottom right point
+     * @param y the y coordinate of the bottom right point
+     */
     public void setBottomRight(int x, int y) {
         this.bottomRight[0] = x;
         this.bottomRight[1] = y;
         postInvalidate();
     }
 
+    /**
+     * Returns the top left coordinate as an integer array (dim: int[2]).
+     *
+     * @return the top left coordinate
+     */
     public int[] getTopLeft() { return this.topLeft; }
 
+    /**
+     * Returns the bottom right coordinate as an integer array (dim: int[2]).
+     *
+     * @return the bottom right coordinate
+     */
     public int[] getBottomRight() { return this.bottomRight; }
 }

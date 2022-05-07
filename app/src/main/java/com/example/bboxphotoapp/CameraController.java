@@ -49,6 +49,11 @@ public class CameraController {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
 
+    /**
+     * Creates a camera instance and allows the user to take photos.
+     *
+     * @param context the current context
+     */
     public CameraController(Context context) {
         this.context = context;
         this.activity = Utils.getActivity(this.context);
@@ -58,6 +63,10 @@ public class CameraController {
         startCamera();
     }
 
+    /**
+     * Initializes the camera instance.
+     *
+     */
     private void startCamera() {
         // create camera instance
         cameraProviderFuture = ProcessCameraProvider.getInstance(this.context);
@@ -74,6 +83,11 @@ public class CameraController {
         }, ContextCompat.getMainExecutor(this.context));
     }
 
+    /**
+     * Binds a preview to the camera object.
+     *
+     * @param cameraProvider camera instance within the current context
+     */
     private void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
         // builds an immutable camera preview
         Preview preview = new Preview.Builder().build();
@@ -101,7 +115,20 @@ public class CameraController {
                 preview);
     }
 
-    public void takePhoto() {
+    /**
+     * Captures the image within the camera surface preview. Passes the arguments as a bounding box
+     * to be saved within the main JSON file.
+     *
+     * @param topLeft the top left coordinates of the bounding box
+     * @param bottomRight the bottom right coordinates of the bounding box
+     */
+    public void takePhoto(int[] topLeft, int[] bottomRight) {
+
+        // concatenate top left and bottom right coordinates
+        int[] bbox = new int[topLeft.length + bottomRight.length];
+        System.arraycopy(topLeft, 0, bbox, 0, topLeft.length);
+        System.arraycopy(bottomRight, 0, bbox, topLeft.length, bottomRight.length);
+
         // take picture; toast messages for confirmation
         imageCapture.takePicture(getOutputOptions(),
                 ContextCompat.getMainExecutor(this.activity),
@@ -109,7 +136,8 @@ public class CameraController {
 
             @Override
             public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-                JSONManager.saveToJSON(context, outputFileResults.getSavedUri());
+                // save output to json
+                JSONManager.saveToJSON(context, outputFileResults.getSavedUri(), bbox);
 
                 // toast notification on image capture success
                 Toast.makeText(context,
@@ -131,6 +159,11 @@ public class CameraController {
         });
     }
 
+    /**
+     * Custom metadata for the output of an image.
+     *
+     * @return ImageCapture.OutputFileOptions object with custom metadata
+     */
     private ImageCapture.OutputFileOptions getOutputOptions() {
         // output image name; current date and time
         String outputName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
