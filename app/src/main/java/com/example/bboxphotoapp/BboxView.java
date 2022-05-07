@@ -7,11 +7,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
 
-public class BboxView extends View {
+public class BboxView extends AppCompatImageView {
 
     private static final String TAG = "BboxView";
 
@@ -24,26 +25,20 @@ public class BboxView extends View {
     private int[] topLeft = new int[2];
     private int[] bottomRight = new int[2];
 
-    public BboxView(Context context) {
+    public BboxView(@NonNull Context context) {
         super(context);
 
         init(null);
     }
 
-    public BboxView(Context context, AttributeSet attrs) {
+    public BboxView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
         init(attrs);
     }
 
-    public BboxView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BboxView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
-        init(attrs);
-    }
-
-    public BboxView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
 
         init(attrs);
     }
@@ -56,13 +51,6 @@ public class BboxView extends View {
         paint.setStyle(Paint.Style.STROKE); // line type
         paint.setColor(Color.BLACK); // line color
         paint.setStrokeWidth(strokeWidth); // line thickness
-    }
-
-    public void update() {
-//        paint.setColor(paint.getColor() == Color.BLACK ? Color.RED : Color.BLACK);
-
-        // calls onDraw() method
-        postInvalidate();
     }
 
     @Override
@@ -91,11 +79,13 @@ public class BboxView extends View {
     public void setTopLeft(int x, int y) {
         this.topLeft[0] = x;
         this.topLeft[1] = y;
+        postInvalidate();
     }
 
     public void setBottomRight(int x, int y) {
         this.bottomRight[0] = x;
         this.bottomRight[1] = y;
+        postInvalidate();
     }
 
     public int[] getTopLeft() { return this.topLeft; }

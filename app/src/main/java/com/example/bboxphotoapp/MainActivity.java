@@ -2,6 +2,7 @@ package com.example.bboxphotoapp;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -91,5 +92,57 @@ public class MainActivity extends AppCompatActivity {
 
         // set listener on floating action button
         btnFloating.setOnClickListener(view -> cc.takePhoto());
+
+        imgViewTopLeft.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int action = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+                int xCenter = imgViewTopLeft.getWidth() / 2;
+                int yCenter = imgViewTopLeft.getHeight() / 2;
+                int x = (int) motionEvent.getRawX();
+                int y = (int) motionEvent.getRawY();
+
+                switch(action) {
+                    case MotionEvent.ACTION_DOWN:
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        bboxView.setTopLeft(x, y);
+                        imgViewTopLeft.setX(x-xCenter);
+                        imgViewTopLeft.setY(y-yCenter);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        imgViewBottomRight.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int action = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+                int xCenter = imgViewBottomRight.getWidth() / 2;
+                int yCenter = imgViewBottomRight.getHeight() / 2;
+                int x = (int) motionEvent.getRawX();
+                int y = (int) motionEvent.getRawY();
+
+                switch(action) {
+                    case MotionEvent.ACTION_DOWN:
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        bboxView.setBottomRight(x, y);
+                        imgViewBottomRight.setX(x-xCenter);
+                        imgViewBottomRight.setY(y-yCenter);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
     }
 }
