@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
@@ -17,38 +18,45 @@ import androidx.core.view.MotionEventCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    
+    private ClassNameManager cnm; // manages the classification name strings
+    
+    private PreviewView previewView; // surface view for camera preview
+    private BboxView bboxView; // the bounding box view
+    private CameraController cc; // camera object; used to take photos
 
-    private FloatingActionButton btnFloating;
-    private ImageButton btnImage;
-    private ImageView imgViewTopLeft;
-    private ImageView imgViewBottomRight;
+    private FloatingActionButton btnTakePhoto; // button to take photos
+    private ImageButton btnEditImage; // button to edit images
+    private ImageView imgViewTopLeft; // used to readjust the top left of the bounding box
+    private ImageView imgViewBottomRight; // used to readjust the bottom right of the bounding box
+    private Spinner classSpinner; // spinner view to display and choose classification name
 
-    private PreviewView previewView;
-    private BboxView bboxView;
-    private CameraController cc;
+    private String className; // classification name
 
-    private int xCenter;
-    private int yCenter;
-
+    private int xCenter; // the center x-coordinate of the image for the ImageView objects
+    private int yCenter; // the center y-coordinate of the image for the ImageView objects
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // views
+        // object used to manage the strings displayed in the spinner view
+        cnm = new ClassNameManager();
+
+        // initialize camera surface preview and bounding box view
         previewView = findViewById(R.id.previewView);
         bboxView = findViewById(R.id.bboxView);
 
         // adjustment indicators
         imgViewTopLeft = findViewById(R.id.imgViewTopLeft);
         imgViewBottomRight = findViewById(R.id.imgViewBottomRight);
+
+        // spinner for choosing image classification
+        classSpinner = findViewById(R.id.classSpinner);
 
         // init adjustment indicator locations after bboxView initializes dimensions
         bboxView.post(() -> {
@@ -70,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // init buttons
-        btnFloating = findViewById(R.id.btnFloating);
-        btnImage = findViewById(R.id.btnImage);
+        btnTakePhoto = findViewById(R.id.btnTakePhoto);
+        btnEditImage = findViewById(R.id.btnEditImage);
 
         // get storage permissions
         if(!Utils.hasStoragePermissions(this)) {
@@ -88,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         // try to set preview image for edit button
         try{
-            this.btnImage.setImageURI(JSONManager.getHeadImageUri());
+            this.btnEditImage.setImageURI(JSONManager.getHeadImageUri());
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -97,27 +105,37 @@ public class MainActivity extends AppCompatActivity {
         cc = new CameraController(this);
 
         // set listener on floating action button
-        btnFloating.setOnClickListener(view -> cc.takePhoto(bboxView.getTopLeft(), bboxView.getBottomRight()));
+        btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
+                bboxView.getTopLeft(),
+                bboxView.getBottomRight(),
+                className));
 
+        // init array adapter from ClassNameManager object
+        classSpinner.setAdapter(cnm.getArrayAdapter(this));
+
+        // init item select listener
+        classSpinner.setOnItemSelectedListener(getOisl());
+
+        // init listeners on image views; allows user to readjust bbox size
         imgViewTopLeft.setOnTouchListener(getOtl(0));
-
         imgViewBottomRight.setOnTouchListener(getOtl(1));
     }
 
     /**
-     * Creates an OnTouchListener object.
+     * Creates a listener object using the OnTouchListener interface.
      *
-     * Allows the user to readjust the bounding box in the main view by moving the image views.
+     * Allows the user to readjust the bounding box in the main view by moving the image view
+     * corresponding to the boxes upper left or bottom right corner.
      *
      * @param img 0: top left; 1: bottom right
-     * @return an OnTouchListener object
+     * @return View.OnTouchListener object
      */
     public View.OnTouchListener getOtl(int img) {
 
         View.OnTouchListener otl = new View.OnTouchListener() {
 
-            // pointer used for multi-touch events
-            private int mActivePointerId = INVALID_POINTER_ID;
+            // the current active pointer; used for multi-touch events
+            private int activePointerId = INVALID_POINTER_ID;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -136,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
                         final int y = (int) motionEvent.getRawY(pointerIndex);
 
                         // save active pointer id
-                        mActivePointerId = MotionEventCompat.getPointerId(motionEvent, pointerIndex);
+                        activePointerId = MotionEventCompat.getPointerId(motionEvent, pointerIndex);
                         break;
                     }
                     case MotionEvent.ACTION_MOVE: {
-                        final int pointerIndex = MotionEventCompat.findPointerIndex(motionEvent, mActivePointerId);
+                        final int pointerIndex = MotionEventCompat.findPointerIndex(motionEvent, activePointerId);
                         final int x = (int) motionEvent.getRawX(pointerIndex);
                         final int y = (int) motionEvent.getRawY(pointerIndex);
 
@@ -164,22 +182,22 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case MotionEvent.ACTION_UP: {
                         // invalidate pointer after user lets go of touch event
-                        mActivePointerId = INVALID_POINTER_ID;
+                        activePointerId = INVALID_POINTER_ID;
                         break;
                     }
                     case MotionEvent.ACTION_CANCEL: {
                         // invalidate pointer after user cancels action
-                        mActivePointerId = INVALID_POINTER_ID;
+                        activePointerId = INVALID_POINTER_ID;
                         break;
                     }
                     case MotionEvent.ACTION_POINTER_UP: {
                         final int pointerIndex = MotionEventCompat.getActionIndex(motionEvent);
                         final int pointerId = MotionEventCompat.getPointerId(motionEvent, pointerIndex);
 
-                        if(pointerId == mActivePointerId) {
+                        if(pointerId == activePointerId) {
                             // choose new pointer after up event
                             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-                            mActivePointerId = MotionEventCompat.getPointerId(motionEvent, newPointerIndex);
+                            activePointerId = MotionEventCompat.getPointerId(motionEvent, newPointerIndex);
                         }
                         break;
                     }
@@ -187,7 +205,35 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         };
-
         return otl; // return listener object
+    }
+
+    /**
+     * Creates a listener using the OnItemSelectedListener interface.
+     *
+     * Allows the user to choose a classification name for their image.
+     *
+     * @return AdapterView.OnItemSelectedListener object
+     */
+    public AdapterView.OnItemSelectedListener getOisl() {
+        AdapterView.OnItemSelectedListener oisl = new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String name = String.valueOf(classSpinner.getItemAtPosition(i));
+                className = name;
+                
+                // toast verification to user
+                Toast.makeText(MainActivity.this, name, Toast.LENGTH_SHORT).show();
+                
+                Log.d(TAG, className);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        };
+        return oisl;
     }
 }

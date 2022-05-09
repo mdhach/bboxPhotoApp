@@ -33,8 +33,6 @@ import java.util.Arrays;
 public class ImageObject {
 
     private static final String TAG = "ImageObject";
-    private final int ROWS = 2; // the total # of rows within the bounding box
-    private final int COLS = 2; // the total # of columns within the bounding box
 
     public String imageName; // display name of image
     public String imageUri; // uri of image

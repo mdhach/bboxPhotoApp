@@ -141,13 +141,14 @@ public final class JSONManager {
      *
      * @param uri uri of image to save
      */
-    public static void saveToJSON(Context context, Uri uri, int[] bbox) {
+    public static void saveToJSON(Context context, Uri uri, String className, int[] bbox) {
         try{
+            // init image name and id using the uri
             String name = getImageName(context, uri);
             String id = uri.getLastPathSegment();
 
             // init imageJSON and get main JSON object
-            ImageObject imageObject = new ImageObject(name, uri.toString(), "Person", bbox);
+            ImageObject imageObject = new ImageObject(name, uri.toString(), className, bbox);
             JSONObject imageJSON = imageObject.getImageJSON();
 
             // append ImageObject to JSONMain as imageJSON

@@ -122,7 +122,7 @@ public class CameraController {
      * @param topLeft the top left coordinates of the bounding box
      * @param bottomRight the bottom right coordinates of the bounding box
      */
-    public void takePhoto(int[] topLeft, int[] bottomRight) {
+    public void takePhoto(int[] topLeft, int[] bottomRight, String className) {
 
         // concatenate top left and bottom right coordinates
         int[] bbox = new int[topLeft.length + bottomRight.length];
@@ -137,7 +137,10 @@ public class CameraController {
             @Override
             public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
                 // save output to json
-                JSONManager.saveToJSON(context, outputFileResults.getSavedUri(), bbox);
+                JSONManager.saveToJSON(context,
+                        outputFileResults.getSavedUri(),
+                        className,
+                        bbox);
 
                 // toast notification on image capture success
                 Toast.makeText(context,

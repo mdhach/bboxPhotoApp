@@ -1,5 +1,8 @@
 <resources>
+    <!-- Content Descriptions -->
     <string name="app_name">Photo Capture App</string>
-    <string name="btn_btnFloating">Take Photo</string>
-    <string name="btn_btnImage">Edit Photos</string>
+    <string name="btn_btnTakePhoto">Take Photo</string>
+    <string name="btn_btnEditImage">Edit Photos</string>
+    <string name="btn_btnOptionsMenu">Options Menu</string>
+    <string name="btn_classSpinner">Change Class</string>
 </resources>

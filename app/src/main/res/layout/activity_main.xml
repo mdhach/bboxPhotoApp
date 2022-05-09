@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,7 +10,8 @@
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@color/dark_gray"/>
 
     <RelativeLayout
         android:id="@+id/bboxLayout"
@@ -41,26 +43,51 @@
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnFloating"
+        android:id="@+id/btnTakePhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:contentDescription="@string/btn_btnFloating"
+        android:contentDescription="@string/btn_btnTakePhoto"
         android:src="@drawable/ic_action_take_photo"
+        android:backgroundTint="@color/dark_gray"
+        android:outlineSpotShadowColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <ImageButton
-        android:id="@+id/btnImage"
-        android:layout_width="80dp"
+        android:id="@+id/btnEditImage"
+        android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/ic_action_take_photo"
-        android:contentDescription="@string/btn_btnImage"
+        android:contentDescription="@string/btn_btnEditImage"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="30dp"
-        app:layout_constraintLeft_toRightOf="@id/btnFloating"
+        android:layout_marginBottom="32dp"
+        android:layout_marginLeft="25dp"
+        app:layout_constraintLeft_toRightOf="@id/btnTakePhoto"
+        app:layout_constraintRight_toLeftOf="@+id/btnOptionsMenu"/>
+
+    <ImageButton
+        android:id="@+id/btnOptionsMenu"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_action_settings"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/btn_btnOptionsMenu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="27dp"
+        app:layout_constraintLeft_toRightOf="@id/btnEditImage"
         app:layout_constraintRight_toRightOf="parent"/>
+
+    <Spinner
+        android:id="@+id/classSpinner"
+        android:contentDescription="@string/btn_classSpinner"
+        android:layout_width="165dp"
+        android:layout_height="56dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btnTakePhoto"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="30dp"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_center_line"
