@@ -7,22 +7,33 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.view.MotionEventCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     
-    private ClassNameManager cnm; // manages the classification name strings
+    private SpinnerAdapter spAdapter; // custom spinner adapter
+    
+    private AlertDialog.Builder dialogBuilder; // used to build an alert dialog
+    private AlertDialog dialog; // the dialog object
+    private EditText editClassText; // user-defined class to add to spinner
+    private Button btnAddButton; // adds class to spinner
+    private Button btnCancelButton; // cancels dialog action
     
     private PreviewView previewView; // surface view for camera preview
     private BboxView bboxView; // the bounding box view
@@ -30,11 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FloatingActionButton btnTakePhoto; // button to take photos
     private ImageButton btnEditImage; // button to edit images
+    private ImageButton btnAddClass; // button to add classes
     private ImageView imgViewTopLeft; // used to readjust the top left of the bounding box
     private ImageView imgViewBottomRight; // used to readjust the bottom right of the bounding box
     private Spinner classSpinner; // spinner view to display and choose classification name
-
-    private String className; // classification name
 
     private int xCenter; // the center x-coordinate of the image for the ImageView objects
     private int yCenter; // the center y-coordinate of the image for the ImageView objects
@@ -43,9 +53,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // object used to manage the strings displayed in the spinner view
-        cnm = new ClassNameManager();
 
         // initialize camera surface preview and bounding box view
         previewView = findViewById(R.id.previewView);
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         // init buttons
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnEditImage = findViewById(R.id.btnEditImage);
+        btnAddClass = findViewById(R.id.btnAddClass);
 
         // get storage permissions
         if(!Utils.hasStoragePermissions(this)) {
@@ -103,22 +111,31 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize camera controller object
         cc = new CameraController(this);
+        
+        // initialize spinner adapter with an array of default
+        spAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_item, new ArrayList<String>() {
+            {
+                add("Default");
+            }
+        });
+        
+        // set class spinner adapter to custom adapter
+        classSpinner.setAdapter(spAdapter);
+
+        // init add class button
+        btnAddClass.setOnClickListener(view -> {
+            createDialog();
+        });
+
+        // init listeners on image views; allows user to readjust bbox size
+        imgViewTopLeft.setOnTouchListener(getOtl(0));
+        imgViewBottomRight.setOnTouchListener(getOtl(1));
 
         // set listener on floating action button
         btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
                 bboxView.getTopLeft(),
                 bboxView.getBottomRight(),
-                className));
-
-        // init array adapter from ClassNameManager object
-        classSpinner.setAdapter(cnm.getArrayAdapter(this));
-
-        // init item select listener
-        classSpinner.setOnItemSelectedListener(getOisl());
-
-        // init listeners on image views; allows user to readjust bbox size
-        imgViewTopLeft.setOnTouchListener(getOtl(0));
-        imgViewBottomRight.setOnTouchListener(getOtl(1));
+                spAdapter.getClassName())); // gets class name from spinner adapter
     }
 
     /**
@@ -209,31 +226,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a listener using the OnItemSelectedListener interface.
-     *
-     * Allows the user to choose a classification name for their image.
-     *
-     * @return AdapterView.OnItemSelectedListener object
+     * Creates a dialog box that allows the user to add a new class to the
+     * class spinner object.
+     * 
      */
-    public AdapterView.OnItemSelectedListener getOisl() {
-        AdapterView.OnItemSelectedListener oisl = new AdapterView.OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String name = String.valueOf(classSpinner.getItemAtPosition(i));
-                className = name;
-                
-                // toast verification to user
-                Toast.makeText(MainActivity.this, name, Toast.LENGTH_SHORT).show();
-                
-                Log.d(TAG, className);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
-        };
-        return oisl;
+    public void createDialog() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        final View dialogView = getLayoutInflater().inflate(R.layout.class_prompt, null);
+        
+        editClassText = dialogView.findViewById(R.id.addClassText);
+        btnAddButton = dialogView.findViewById(R.id.addButton);
+        btnCancelButton = dialogView.findViewById(R.id.cancelButton);
+        
+        dialogBuilder.setView(dialogView);
+        dialog = dialogBuilder.create();
+        dialog.show();
+        
+        // adds a user-defined string to the list contained by the Spinner Adapter object
+        btnAddButton.setOnClickListener(view -> {
+            // get string value
+            String newClass = String.valueOf(editClassText.getText());
+            
+            // add string to Spinner Adapter
+            spAdapter.add(newClass);
+            
+            // refresh adapter list
+            spAdapter.notifyDataSetChanged();
+            
+            // dismiss dialog box
+            dialog.dismiss();
+        });
+        
+        // allows user to cancel dialog action
+        btnCancelButton.setOnClickListener(view -> {
+            // dismiss dialog box
+            dialog.dismiss();
+        });
     }
 }
