@@ -2,22 +2,22 @@ package com.example.bboxphotoapp;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.view.MotionEventCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -27,25 +27,31 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     
+    private CameraController cc; // camera object; used to take photos
+    
+    // spinner objects
+    private Spinner classSpinner; // spinner view to display and choose classification name
     private SpinnerAdapter spAdapter; // custom spinner adapter
     
+    // alert dialog objects
     private AlertDialog.Builder dialogBuilder; // used to build an alert dialog
     private AlertDialog dialog; // the dialog object
     private EditText editClassText; // user-defined class to add to spinner
     private Button btnAddButton; // adds class to spinner
     private Button btnCancelButton; // cancels dialog action
     
+    // views
     private PreviewView previewView; // surface view for camera preview
     private BboxView bboxView; // the bounding box view
-    private CameraController cc; // camera object; used to take photos
-
-    private FloatingActionButton btnTakePhoto; // button to take photos
-    private ImageButton btnEditImage; // button to edit images
-    private ImageButton btnAddClass; // button to add classes
     private ImageView imgViewTopLeft; // used to readjust the top left of the bounding box
     private ImageView imgViewBottomRight; // used to readjust the bottom right of the bounding box
-    private Spinner classSpinner; // spinner view to display and choose classification name
-
+    
+    // buttons
+    private FloatingActionButton btnTakePhoto; // button to take photos
+    private ImageButton btnViewImage; // button to edit images
+    private ImageButton btnAddClass; // button to add classes
+    
+    // ImageView variables
     private int xCenter; // the center x-coordinate of the image for the ImageView objects
     private int yCenter; // the center y-coordinate of the image for the ImageView objects
     
@@ -54,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize camera surface preview and bounding box view
+        // init views
         previewView = findViewById(R.id.previewView);
         bboxView = findViewById(R.id.bboxView);
 
@@ -86,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         // init buttons
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
-        btnEditImage = findViewById(R.id.btnEditImage);
+        btnViewImage = findViewById(R.id.btnViewImage);
         btnAddClass = findViewById(R.id.btnAddClass);
 
         // get storage permissions
@@ -102,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
         // initialize JSON object if it exists in storage
         JSONManager.initJSON(this);
 
-        // try to set preview image for edit button
+        // try to set preview image for btnViewImage
         try{
-            this.btnEditImage.setImageURI(JSONManager.getHeadImageUri());
+            this.btnViewImage.setImageURI(JSONManager.getHeadImageUri());
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -130,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
         // init listeners on image views; allows user to readjust bbox size
         imgViewTopLeft.setOnTouchListener(getOtl(0));
         imgViewBottomRight.setOnTouchListener(getOtl(1));
+        
+        btnViewImage.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, ViewImageActivity.class));
+        });
 
         // set listener on floating action button
         btnTakePhoto.setOnClickListener(view -> cc.takePhoto(

@@ -51,7 +51,8 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
     }
 
     public View getCustomDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+//        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+        LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
         View rowView = inflater.inflate(R.layout.custom_spinner, parent, false);
 
         String text = list.get(position);

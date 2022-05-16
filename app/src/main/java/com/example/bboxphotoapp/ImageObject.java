@@ -36,7 +36,7 @@ public class ImageObject {
 
     public String imageName; // display name of image
     public String imageUri; // uri of image
-    public JSONObject imageJSON; // image object as a JSONObject
+    //public JSONObject imageJSON; // image object as a JSONObject
 
     // used for classification; defined by user
     public String imageClass; // classification name; default null
@@ -54,10 +54,10 @@ public class ImageObject {
         this.imageName = name;
         this.imageUri = uri;
         this.imageClass = className;
-        this.imageJSON = new JSONObject();
+        //this.imageJSON = new JSONObject();
 
         // check bounding box dimension requirements; sets to null otherwise
-        this.imageBbox = (bbox != null && bbox.length == 4) ? bbox : null;
+        this.imageBbox = (bbox.length == 4) ? bbox : null;
     }
 
     /**
@@ -124,16 +124,17 @@ public class ImageObject {
      * @return the image JSON
      */
     public JSONObject getImageJSON() {
+        JSONObject imageJSON = new JSONObject();
         try {
             JSONArray bbox = new JSONArray(this.imageBbox);
-            this.imageJSON.put("name", this.imageName);
-            this.imageJSON.put("uri", this.imageUri);
-            this.imageJSON.put("class", this.imageClass);
-            this.imageJSON.put("bbox", bbox);
+            imageJSON.put("name", this.imageName);
+            imageJSON.put("uri", this.imageUri);
+            imageJSON.put("class", this.imageClass);
+            imageJSON.put("bbox", bbox);
         } catch(JSONException e) {
             e.printStackTrace();
         }
-        return this.imageJSON;
+        return imageJSON;
     }
 
     @Override

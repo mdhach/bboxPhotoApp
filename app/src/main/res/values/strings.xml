@@ -2,7 +2,7 @@
     <!-- Content Descriptions -->
     <string name="app_name">Photo Capture App</string>
     <string name="btn_btnTakePhoto">Take Photo</string>
-    <string name="btn_btnEditImage">Edit Photos</string>
+    <string name="btn_btnViewImages">View Photos</string>
     <string name="btn_btnOptionsMenu">Options Menu</string>
     <string name="btn_classSpinner">Change Class</string>
     <string name="btn_addClass">Add Class</string>

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -213,11 +214,67 @@ public final class JSONManager {
     public static Uri getHeadImageUri() { return headImageUri; }
 
     /**
-     * Returns main JSON file as JSONObject.
-     *
-     * Typically called to append data or to update key/value pairings.
-     *
-     * @return the main JSONObject
+     * Gets all the current images in JSONMain and returns them in an
+     * ArrayList of ImageObjects.
+     * 
+     * @return ArrayList of ImageObjects
      */
-    public static JSONObject getJSON() { return JSONMain; }
+    public static ArrayList<ImageObject> getImageObjectArray() {
+        ArrayList<ImageObject> arr = new ArrayList<>();
+        
+        if(JSONMain != null) {
+            JSONObject jsonObject;
+            
+            String key;
+            Iterator<String> iterator = JSONMain.keys();
+
+            while(iterator.hasNext()) {
+                key = iterator.next();
+                try{
+                    if(JSONMain.get(key) instanceof JSONObject) {
+                        jsonObject = JSONMain.getJSONObject(key);
+                        arr.add(JSONToImageObject(jsonObject));
+                    }
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return arr;
+    }
+
+    /**
+     * Unpacks JSONObject as an ImageObject.
+     *
+     * @param jsonObject the JSONObject to compile
+     * @return an ImageObject with the data from the JSONObject
+     */
+    public static ImageObject JSONToImageObject(JSONObject jsonObject) {
+        ImageObject imageObject; // the ImageObject to return
+        JSONArray jsonArray; // used to convert JSONArray to an int array
+        String name, uri, className; // field variables
+        int[] bbox; // int array for the bounding box coordinates
+
+        try {
+            // get JSONObject field data
+            name = jsonObject.getString("name");
+            uri = jsonObject.getString("uri");
+            className = jsonObject.getString("class");
+            jsonArray = jsonObject.getJSONArray("bbox");
+
+            bbox = new int[jsonArray.length()];
+
+            for(int i = 0; i < bbox.length; i++) {
+                bbox[i] = jsonArray.optInt(i);
+            }
+
+            imageObject = new ImageObject(name, uri, className, bbox);
+            return imageObject;
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

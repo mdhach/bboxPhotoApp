@@ -56,11 +56,11 @@
         app:layout_constraintRight_toRightOf="parent"/>
 
     <ImageButton
-        android:id="@+id/btnEditImage"
+        android:id="@+id/btnViewImage"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/ic_action_take_photo"
-        android:contentDescription="@string/btn_btnEditImage"
+        android:contentDescription="@string/btn_btnViewImages"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="32dp"
         android:layout_marginLeft="25dp"
@@ -76,7 +76,7 @@
         android:contentDescription="@string/btn_btnOptionsMenu"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="27dp"
-        app:layout_constraintLeft_toRightOf="@id/btnEditImage"
+        app:layout_constraintLeft_toRightOf="@id/btnViewImage"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <Spinner
