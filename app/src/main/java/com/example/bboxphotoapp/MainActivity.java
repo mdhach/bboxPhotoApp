@@ -17,6 +17,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.view.MotionEventCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     
     private CameraController cc; // camera object; used to take photos
+    
+    // fragment objects
+    private Fragment fragment;
+    private FragmentManager fragmentManager;
+    private FragmentTransaction fragmentTransaction;
     
     // spinner objects
     private Spinner classSpinner; // spinner view to display and choose classification name
@@ -60,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //if(savedInstanceState == null) { initLoginFragment(); }
+
         // init views
         previewView = findViewById(R.id.previewView);
         bboxView = findViewById(R.id.bboxView);
@@ -73,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         // init adjustment indicator locations after bboxView initializes dimensions
         bboxView.post(() -> {
-            // image dims
+            // image center
             xCenter = imgViewTopLeft.getWidth() / 2;
             yCenter = imgViewTopLeft.getHeight() / 2;
 
@@ -143,8 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
         // set listener on floating action button
         btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
-                bboxView.getTopLeft(),
-                bboxView.getBottomRight(),
+                bboxView.getBbox(),
                 spAdapter.getClassName())); // gets class name from spinner adapter
     }
 
@@ -244,12 +253,13 @@ public class MainActivity extends AppCompatActivity {
         dialogBuilder = new AlertDialog.Builder(this);
         final View dialogView = getLayoutInflater().inflate(R.layout.class_prompt, null);
         
+        // init dialog views
         editClassText = dialogView.findViewById(R.id.addClassText);
         btnAddButton = dialogView.findViewById(R.id.addButton);
         btnCancelButton = dialogView.findViewById(R.id.cancelButton);
         
-        dialogBuilder.setView(dialogView);
-        dialog = dialogBuilder.create();
+        dialogBuilder.setView(dialogView); // set the view for the dialog layout
+        dialog = dialogBuilder.create(); // create dialog object
         dialog.show();
         
         // adds a user-defined string to the list contained by the Spinner Adapter object
@@ -272,5 +282,18 @@ public class MainActivity extends AppCompatActivity {
             // dismiss dialog box
             dialog.dismiss();
         });
+    }
+    
+    public void initLoginFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .setReorderingAllowed(true)
+                .add(R.id.fragmentContainer, FragmentLogin.class, null)
+                .commit();
+//        fragment = new FragmentLogin();
+//        fragmentManager = getSupportFragmentManager();
+//        fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.addToBackStack(null);
+//        fragmentTransaction.add(R.id.fragmentContainer, fragment);
+//        fragmentTransaction.commit();
     }
 }

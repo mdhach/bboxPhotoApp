@@ -119,16 +119,10 @@ public class CameraController {
      * Captures the image within the camera surface preview. Passes the arguments as a bounding box
      * to be saved within the main JSON file.
      *
-     * @param topLeft the top left coordinates of the bounding box
-     * @param bottomRight the bottom right coordinates of the bounding box
+     * @param bbox the image bbox coordinates
+     * @param className the image classification name
      */
-    public void takePhoto(int[] topLeft, int[] bottomRight, String className) {
-
-        // concatenate top left and bottom right coordinates
-        int[] bbox = new int[topLeft.length + bottomRight.length];
-        System.arraycopy(topLeft, 0, bbox, 0, topLeft.length);
-        System.arraycopy(bottomRight, 0, bbox, topLeft.length, bottomRight.length);
-
+    public void takePhoto(int[] bbox,  String className) {
         // take picture; toast messages for confirmation
         imageCapture.takePicture(getOutputOptions(),
                 ContextCompat.getMainExecutor(this.activity),

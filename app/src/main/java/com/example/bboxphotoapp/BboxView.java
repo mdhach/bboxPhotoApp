@@ -72,7 +72,7 @@ public class BboxView extends AppCompatImageView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
+        
         // init bounding box dimensions; default dims based on canvas
         setTopLeft(w/4, h/4);
         setBottomRight((int)(w * 0.75), (int)(h * 0.75));
@@ -115,4 +115,16 @@ public class BboxView extends AppCompatImageView {
      * @return the bottom right coordinate
      */
     public int[] getBottomRight() { return this.bottomRight; }
+
+    /**
+     * Concatenates the top left and bottom right coordinates into an array.
+     * 
+     * @return the top left and bottom right coordinates
+     */
+    public int[] getBbox() {
+        int[] bbox = new int[topLeft.length + bottomRight.length];
+        System.arraycopy(topLeft, 0, bbox, 0, topLeft.length);
+        System.arraycopy(bottomRight, 0, bbox, topLeft.length, bottomRight.length);
+        return bbox;
+    }
 }

@@ -10,5 +10,12 @@
         android:id="@+id/imagesRecView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-    
+
+    <Button
+        android:id="@+id/btnBack"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="Back" />
+
 </RelativeLayout>

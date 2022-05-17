@@ -1,6 +1,7 @@
 package com.example.bboxphotoapp;
 
 import android.app.Activity;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,12 +50,14 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
         private ImageView image;
         private LinearLayout parent;
         private TextView name;
+        private TextView className;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.imageListItem);
             parent = itemView.findViewById(R.id.imageListParent);
             name = itemView.findViewById(R.id.imageListName);
+            className = itemView.findViewById(R.id.imageListClass);
         }
     }
 
@@ -69,11 +72,18 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String name = imageObjects.get(position).getImageName();
-        Uri uri = Uri.parse(imageObjects.get(position).getImageUri());
+        // current image object
+        ImageObject imageObject = imageObjects.get(position);
         
+        // retrieve image metadata
+        String name = imageObject.getImageName();
+        String className = imageObject.getImageClass();
+        Uri uri = Uri.parse(imageObject.getImageUri());
+        
+        // set image metadata in recycler adapter
         holder.image.setImageURI(uri);
-        holder.name.setText(name);
+        holder.name.setText("File Name: " + name);
+        holder.className.setText("Class Name: " + className);
     }
 
     @Override
@@ -85,5 +95,4 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
         this.imageObjects = imageObjects;
         notifyDataSetChanged();
     }
-    
 }
