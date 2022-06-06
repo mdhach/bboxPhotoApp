@@ -2,8 +2,11 @@ package com.example.bboxphotoapp;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +23,6 @@ import androidx.core.view.MotionEventCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton btnTakePhoto; // button to take photos
     private ImageButton btnViewImage; // button to edit images
     private ImageButton btnAddClass; // button to add classes
+    private ImageButton btnOptions;
     
     // ImageView variables
     private int xCenter; // the center x-coordinate of the image for the ImageView objects
@@ -67,8 +70,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //if(savedInstanceState == null) { initLoginFragment(); }
+        
+        PrefsManager.init(this);
+        
+        //if(savedInstanceState == null) { addLoginFragment(); }
 
         // init views
         previewView = findViewById(R.id.previewView);
@@ -99,12 +104,13 @@ public class MainActivity extends AppCompatActivity {
             imgViewBottomRight.setX(bottomRight[0] - xCenter);
             imgViewBottomRight.setY(bottomRight[1] - yCenter);
         });
-
+        
         // init buttons
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnViewImage = findViewById(R.id.btnViewImage);
         btnAddClass = findViewById(R.id.btnAddClass);
-
+        btnOptions = findViewById(R.id.btnOptionsMenu);
+        
         // get storage permissions
         if(!Utils.hasStoragePermissions(this)) {
             Utils.requestStoragePermissions(this);
@@ -129,10 +135,11 @@ public class MainActivity extends AppCompatActivity {
         cc = new CameraController(this);
         
         // initialize spinner adapter with an array of default
-        spAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_item, new ArrayList<String>() {
-            {
-                add("Default");
-            }
+        spAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_item, 
+                new ArrayList<String>() {
+                {
+                    add("Default");
+                }
         });
         
         // set class spinner adapter to custom adapter
@@ -147,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
         imgViewTopLeft.setOnTouchListener(getOtl(0));
         imgViewBottomRight.setOnTouchListener(getOtl(1));
         
+        // view images activity button listener
         btnViewImage.setOnClickListener(view -> {
             startActivity(new Intent(MainActivity.this, ViewImageActivity.class));
         });
@@ -155,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
         btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
                 bboxView.getBbox(),
                 spAdapter.getClassName())); // gets class name from spinner adapter
+        
+        // start settings activity
+        btnOptions.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+        });
     }
 
     /**
@@ -282,18 +295,5 @@ public class MainActivity extends AppCompatActivity {
             // dismiss dialog box
             dialog.dismiss();
         });
-    }
-    
-    public void initLoginFragment() {
-        getSupportFragmentManager().beginTransaction()
-                .setReorderingAllowed(true)
-                .add(R.id.fragmentContainer, FragmentLogin.class, null)
-                .commit();
-//        fragment = new FragmentLogin();
-//        fragmentManager = getSupportFragmentManager();
-//        fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.add(R.id.fragmentContainer, fragment);
-//        fragmentTransaction.commit();
     }
 }

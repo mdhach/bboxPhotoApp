@@ -25,15 +25,7 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
     private ArrayList<ImageObject> imageObjects;
 
     /**
-     * Constructor method. Initializes ImageObject ArrayList
-     * 
-     */
-    public ImageRecViewAdapter() {
-        this.imageObjects = new ArrayList<>();
-    }
-
-    /**
-     * Overload constructor. Allows user to initialize the ImageObject ArrayList
+     * Constructor. Allows user to initialize the ImageObject ArrayList
      * via argument.
      *
      */
@@ -66,8 +58,7 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
         View view = inflater.inflate(R.layout.image_list_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -76,14 +67,14 @@ public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapte
         ImageObject imageObject = imageObjects.get(position);
         
         // retrieve image metadata
-        String name = imageObject.getImageName();
-        String className = imageObject.getImageClass();
+        String name = "File Name: " + imageObject.getImageName();
+        String className = "Class Name: " + imageObject.getImageClass();
         Uri uri = Uri.parse(imageObject.getImageUri());
         
         // set image metadata in recycler adapter
         holder.image.setImageURI(uri);
-        holder.name.setText("File Name: " + name);
-        holder.className.setText("Class Name: " + className);
+        holder.name.setText(name);
+        holder.className.setText(className);
     }
 
     @Override

@@ -129,7 +129,7 @@ public class CameraController {
                 new ImageCapture.OnImageSavedCallback() {
 
             @Override
-            public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 // save output to json
                 JSONManager.saveToJSON(context,
                         outputFileResults.getSavedUri(),
@@ -144,7 +144,7 @@ public class CameraController {
             }
 
             @Override
-            public void onError(ImageCaptureException error) {
+            public void onError(@NonNull ImageCaptureException error) {
                 error.printStackTrace();
 
                 // toast notification on image capture failure
@@ -161,7 +161,7 @@ public class CameraController {
      *
      * @return ImageCapture.OutputFileOptions object with custom metadata
      */
-    private ImageCapture.OutputFileOptions getOutputOptions() {
+    private @NonNull ImageCapture.OutputFileOptions getOutputOptions() {
         // output image name; current date and time
         String outputName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
                 Locale.getDefault()).format(new Date());

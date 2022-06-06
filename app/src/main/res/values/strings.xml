@@ -1,9 +1,34 @@
 <resources>
     <!-- Content Descriptions -->
-    <string name="app_name">Photo Capture App</string>
+    <string name="app_name">Bbox Photo App</string>
     <string name="btn_btnTakePhoto">Take Photo</string>
     <string name="btn_btnViewImages">View Photos</string>
     <string name="btn_btnOptionsMenu">Options Menu</string>
     <string name="btn_classSpinner">Change Class</string>
     <string name="btn_addClass">Add Class</string>
+    
+    <!-- Confirmation Dialog Titles (cdt) -->
+    <string name="cdt_zip_files">Confirm Action</string>
+    
+    <!-- Confirmation Dialog Messages (cdm) -->
+    <string name="cdm_zip_files">Would you like to zip files?</string>
+    
+    <!-- File name -->
+    <string name="default_json_name">ImageBboxInfo.json</string>
+    
+    <!-- Default save location key -->
+    <string name="save_location_key">SAVE_LOCATION_KEY</string>
+    
+    <!-- Default save name key and value -->
+    <string name="save_name_key">SAVE_NAME_KEY</string>
+    <string name="default_save_name_val">out_IMAGES</string>
+    
+    <!-- Request Keys (rq) -->
+    <string name="rq_confirmation">CONFIRMATION_REQUEST_KEY</string>
+    <string name="rq_save_location">SAVE_LOCATION_REQUEST_KEY</string>
+    
+    <!-- Bundle Keys (bn) -->
+    <string name="bn_confirmation">CONFIRMATION_BUNDLE_KEY</string>
+    <string name="bn_save_location">SAVE_LOCATION_BUNDLE_KEY</string>
+
 </resources>

@@ -8,8 +8,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,10 +15,13 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,8 +32,6 @@ public final class JSONManager {
 
     // json info
     private static JSONObject JSONMain; // main JSON object
-    private static String JSONName = new String("ImageBboxInfo.json");
-    private static File dir; // JSON file path
     private static File JSONFile; // local JSON file
 
     // arbitrary value used to preview an image
@@ -43,13 +42,21 @@ public final class JSONManager {
      *
      * Gets called in MainActivity.
      *
-     * @param context current context
+     * @param context current activity context
      */
     public static void initJSON(Context context) {
-        dir = context.getFilesDir(); // get file path
-        JSONFile = new File(dir, JSONName); // JSON file (path, name)
+        String JSONName = context.getString(R.string.default_json_name);
+        String sourcePath = PrefsManager.getValue(PrefsManager.saveLocKey);
+        
+        JSONFile = new File(sourcePath, JSONName); // JSON file (path, name)
 
         if(JSONFile.exists()) {
+            
+            Log.d(TAG, "M/initJSON: getParent() " + JSONFile.getParent());
+            Log.d(TAG, "M/initJSON: getName() " + JSONFile.getName());
+            Log.d(TAG, "M/initJSON: String.format() " + String.format("%s.zip", JSONFile.getName()));
+            Log.d(TAG, "M/initJSON: getPath().length() " + JSONFile.getPath().length());
+            
             String strToJSON; // JSON as string
 
             // try loading local JSON file
@@ -72,18 +79,50 @@ public final class JSONManager {
 
                 JSONMain = new JSONObject(strToJSON); // init JSONMain with parsed string
 
-                verifyJSON(context); // verifies JSONMain contents
-            } catch(FileNotFoundException e) {
-                e.printStackTrace();
-            } catch(IOException | JSONException e) {
+                //verifyJSON(context); // verifies JSONMain contents
+            } catch(JSONException | IOException e) {
+                Log.d(TAG, "M/initJSON: File not found...");
                 e.printStackTrace();
             }
         } else { JSONMain = new JSONObject(); }
     }
 
     /**
-     * Used during initialization. For any image that a user deletes, it will also be removed
-     * from the main JSON file.
+     * If the path for the JSON file has changed, create new file at the new path and 
+     * overwrite the currently referenced JSON file with the new one. 
+     * 
+     * @param context current activity context
+     */
+    public static void reinitializeJSON(Context context) {
+        String JSONName = context.getString(R.string.default_json_name);
+        String sourcePath = PrefsManager.getValue(PrefsManager.saveLocKey);
+        
+        final int BUFFER = 1024;
+        
+        File file = new File(sourcePath, JSONName);
+        try (InputStream in = new FileInputStream(JSONFile)){
+            try (OutputStream out = new FileOutputStream(file)) {
+                byte[] data = new byte[BUFFER];
+                int len;
+                while ((len = in.read(data)) > 0) {
+                    out.write(data, 0, len);
+                }
+            } finally {
+                in.close();
+            }
+        } catch(IOException e) {
+            Log.d(TAG, "M/reinitializeJSON: IOException");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Updates JSON file by removing image entries that were deleted by the user.
+     * 
+     * Called in initJSON() method.
+     * 
+     * (Temporarily disabled in case user deletes images after compressing them to a zip file,
+     * but also wants to keep the data stored in the JSON file).
      *
      * @param context the current context
      */
@@ -160,6 +199,7 @@ public final class JSONManager {
 
             Log.d(TAG, "Image saved with parameters: " + imageObject);
         } catch(JSONException e) {
+            Log.d(TAG, "M/saveToJSON: JSONException...");
             e.printStackTrace();
         }
 
@@ -178,6 +218,7 @@ public final class JSONManager {
             bw.write(jsonToStr); // write char-input stream to output file: "ImageBboxInfo.json"
             bw.close(); // close BufferedWriter object
         } catch (IOException e) {
+            Log.d(TAG, "M/saveJSONAsFile: IOException...");
             e.printStackTrace();
         }
     }
@@ -198,8 +239,10 @@ public final class JSONManager {
             try{
                 if(cursor != null && cursor.moveToFirst()) {
                     imageName = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                    cursor.close();
                 }
             } catch(Exception e) {
+                Log.d(TAG, "M/getImageName: Null or out of bounds...");
                 e.printStackTrace();
             }
         }
@@ -236,6 +279,7 @@ public final class JSONManager {
                         arr.add(JSONToImageObject(jsonObject));
                     }
                 } catch(JSONException e) {
+                    Log.d(TAG, "M/getImageObjectArray: JSONException...");
                     e.printStackTrace();
                 }
             }
@@ -272,6 +316,7 @@ public final class JSONManager {
             imageObject = new ImageObject(name, uri, className, bbox);
             return imageObject;
         } catch(JSONException e) {
+            Log.d(TAG, "M/JSONToImageObject: JSONException...");
             e.printStackTrace();
         }
 

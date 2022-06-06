@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".SettingsActivity">
+    
+    <TextView
+        android:id="@+id/settings_title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Settings" 
+        android:textSize="25sp"
+        android:gravity="center"/>
+
+    <Button
+        android:id="@+id/settings_save_location"
+        android:layout_width="match_parent"
+        android:layout_height="60dp" 
+        android:text="Change Save Location"/>
+    
+    <Button
+        android:id="@+id/settings_init_json"
+        android:layout_width="match_parent"
+        android:layout_height="60dp" 
+        android:text="Reinitialize JSON File"/>
+    
+    <Button
+        android:id="@+id/settings_zip_files"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Zip Files"/>
+
+    <TextView
+        android:id="@+id/settings_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:gravity="center_vertical"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginTop="8dp"/>
+    
+</LinearLayout>
