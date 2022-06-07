@@ -9,6 +9,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+/**
+ * Generic confirmation dialog fragment.
+ * 
+ * Constructor changes the text of the dialog title and message via arguments.
+ * 
+ * Returns boolean depending on the positive (confirm) and negative (cancel) button.
+ * 
+ */
 public class ConfirmDialogFrag extends AppCompatDialogFragment {
 
     private static final String TAG = "ConfirmDialogFrag";
@@ -26,7 +34,7 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
         this.message = message;
         this.bundle = new Bundle();
     }
-
+    
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

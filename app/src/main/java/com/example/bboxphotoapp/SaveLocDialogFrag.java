@@ -20,6 +20,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+/**
+ * Creates a dialog fragment that changes the save location of the output zip file.
+ * 
+ */
 public class SaveLocDialogFrag extends AppCompatDialogFragment {
 
     private static final String TAG = "SaveLocDialogFrag";

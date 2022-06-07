@@ -19,18 +19,14 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
 
     private static final String TAG = "SpinnerAdapter";
     
-    private Context context;
     private List<String> list;
     
     private String className;
     
-    private TextView spnItemName;
-    private ImageView spnItemDel;
-    
     public SpinnerAdapter(@NonNull Context context, int resource, @NonNull List<String> objects) {
         super(context, resource, objects);
 
-        init(context, objects);
+        init(objects);
     }
 
     @Override
@@ -45,20 +41,18 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
         return super.getView(position, convertView, parent);
     }
     
-    private void init(@NonNull Context context, @NonNull List<String> objects) {
-        this.context = context;
+    private void init(@NonNull List<String> objects) {
         this.list = objects;
     }
 
     public View getCustomDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-//        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
         LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
         View rowView = inflater.inflate(R.layout.custom_spinner, parent, false);
 
         String text = list.get(position);
 
-        spnItemName = rowView.findViewById(R.id.spnItemName);
-        spnItemDel = rowView.findViewById(R.id.spnItemDel);
+        TextView spnItemName = rowView.findViewById(R.id.spnItemName);
+        ImageView spnItemDel = rowView.findViewById(R.id.spnItemDel);
         
         spnItemName.setText(text);
         

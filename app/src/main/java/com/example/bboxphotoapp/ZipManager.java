@@ -16,6 +16,8 @@ import java.util.zip.ZipOutputStream;
  * Code sourced from stackoverflow:
  *  
  *      https://stackoverflow.com/a/53960424/15224280
+ *      
+ * Zips file at given path or recursively zips all files if argument is a directory.
  * 
  */
 public class ZipManager {
@@ -25,13 +27,6 @@ public class ZipManager {
     private String zipName;
     private String saveLocation;
     private File zipPath;
-
-    /**
-     * Constructor method.
-     */
-    public ZipManager() {
-        
-    }
 
     /**
      * Overload constructor method.
@@ -44,13 +39,19 @@ public class ZipManager {
     public ZipManager(String sourcePath, String saveLocation) {
         this.zipPath = new File(sourcePath);
         this.saveLocation = saveLocation;
-        this.zipName = PrefsManager.getValue(PrefsManager.saveNameKey);
+        
+        String name = PrefsManager.getValue(PrefsManager.saveNameKey);
+        this.zipName = String.format("%s.zip", name);
     }
-    
+
+    /**
+     * Utilizes ZipOutputStream to recursively zip files at sourcePath
+     * 
+     * @return true if process completes; false if an exception was thrown
+     */
     public boolean zip() {
-        // create new zip file; saves at arg0 (saveLocation) with name 
-        // arg1 (String.format("%s.zip", this.zipName))
-        File zipFile = new File(saveLocation, String.format("%s.zip", this.zipName));
+        // create new zip file; saves at arg0 (saveLocation) with name arg1 (zipName)
+        File zipFile = new File(saveLocation, zipName);
         
         try {
             // init ZipStream with output zip File
@@ -58,8 +59,8 @@ public class ZipManager {
             zipSubDir(out, zipPath);
             out.close();
         } catch(IOException e) {
-            Log.d(TAG, "M/zip: IOException");
-            e.printStackTrace();
+            Log.d(TAG, "M/zip: IOException...");
+            Log.d(TAG, "M/zip: " + e.getMessage());
             return false;
         }
         return true;
@@ -104,9 +105,8 @@ public class ZipManager {
                 }
             }
         } catch(IOException e) {
-            Log.d(TAG, "M/zipSubDir: IOException");
-            e.printStackTrace();
+            Log.d(TAG, "M/zipSubDir: IOException...");
+            Log.d(TAG, "M/zipSubDir: " + e.getMessage());
         }
-        
     }
 }

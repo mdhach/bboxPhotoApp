@@ -52,10 +52,8 @@ public final class JSONManager {
 
         if(JSONFile.exists()) {
             
-            Log.d(TAG, "M/initJSON: getParent() " + JSONFile.getParent());
-            Log.d(TAG, "M/initJSON: getName() " + JSONFile.getName());
-            Log.d(TAG, "M/initJSON: String.format() " + String.format("%s.zip", JSONFile.getName()));
-            Log.d(TAG, "M/initJSON: getPath().length() " + JSONFile.getPath().length());
+            Log.d(TAG, "M/initJSON: getParent() - " + JSONFile.getParent());
+            Log.d(TAG, "M/initJSON: getName() - " + JSONFile.getName());
             
             String strToJSON; // JSON as string
 
@@ -81,39 +79,13 @@ public final class JSONManager {
 
                 //verifyJSON(context); // verifies JSONMain contents
             } catch(JSONException | IOException e) {
-                Log.d(TAG, "M/initJSON: File not found...");
-                e.printStackTrace();
+                // file exists but is likely empty...
+                JSONMain = new JSONObject();
+                
+                Log.d(TAG, "M/initJSON: JSONException or IOException thrown...");
+                Log.d(TAG, "M/initJSON: " + e.getMessage());
             }
         } else { JSONMain = new JSONObject(); }
-    }
-
-    /**
-     * If the path for the JSON file has changed, create new file at the new path and 
-     * overwrite the currently referenced JSON file with the new one. 
-     * 
-     * @param context current activity context
-     */
-    public static void reinitializeJSON(Context context) {
-        String JSONName = context.getString(R.string.default_json_name);
-        String sourcePath = PrefsManager.getValue(PrefsManager.saveLocKey);
-        
-        final int BUFFER = 1024;
-        
-        File file = new File(sourcePath, JSONName);
-        try (InputStream in = new FileInputStream(JSONFile)){
-            try (OutputStream out = new FileOutputStream(file)) {
-                byte[] data = new byte[BUFFER];
-                int len;
-                while ((len = in.read(data)) > 0) {
-                    out.write(data, 0, len);
-                }
-            } finally {
-                in.close();
-            }
-        } catch(IOException e) {
-            Log.d(TAG, "M/reinitializeJSON: IOException");
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -197,10 +169,10 @@ public final class JSONManager {
             // save/overwrite local JSON file: JSONMain
             saveJSONAsFile();
 
-            Log.d(TAG, "Image saved with parameters: " + imageObject);
+            Log.d(TAG, "M/saveToJSON: Image saved with parameters: " + imageObject);
         } catch(JSONException e) {
             Log.d(TAG, "M/saveToJSON: JSONException...");
-            e.printStackTrace();
+            Log.d(TAG, "M/saveToJSON: " + e.getMessage());
         }
 
     }
@@ -219,12 +191,12 @@ public final class JSONManager {
             bw.close(); // close BufferedWriter object
         } catch (IOException e) {
             Log.d(TAG, "M/saveJSONAsFile: IOException...");
-            e.printStackTrace();
+            Log.d(TAG, "M/saveJSONAsFile: " + e.getMessage());
         }
     }
 
     /**
-     * Locates and returns the display name of an image with its corresponding uri.
+     * Returns the display name of an image using its uri.
      * Returns null if the display name could not be found.
      *
      * @param context the current context
@@ -243,7 +215,7 @@ public final class JSONManager {
                 }
             } catch(Exception e) {
                 Log.d(TAG, "M/getImageName: Null or out of bounds...");
-                e.printStackTrace();
+                Log.d(TAG, "M/getImageName: " + e.getMessage());
             }
         }
         return imageName;
@@ -280,11 +252,10 @@ public final class JSONManager {
                     }
                 } catch(JSONException e) {
                     Log.d(TAG, "M/getImageObjectArray: JSONException...");
-                    e.printStackTrace();
+                    Log.d(TAG, "M/getImageObjectArray: " + e.getMessage());
                 }
             }
         }
-        
         return arr;
     }
 
@@ -317,9 +288,28 @@ public final class JSONManager {
             return imageObject;
         } catch(JSONException e) {
             Log.d(TAG, "M/JSONToImageObject: JSONException...");
-            e.printStackTrace();
+            Log.d(TAG, "M/JSONToImageObject: " + e.getMessage());
         }
-
         return null;
+    }
+
+    /**
+     * Returns the application JSON as a File object.
+     * 
+     * @return File the application JSON
+     */
+    public static File getJSONFile() {
+        return JSONFile;
+    }
+
+    /**
+     * debug;;;;;;;;
+     * check if main json is null;;;;;;;;;;;;'''////////
+     * ;;;;//;;[[]]]]][[[[[]]]]]]
+     * 
+     * @return true if null; false otherwise
+     */
+    public static boolean isMainNull() {
+        return JSONMain == null;
     }
 }

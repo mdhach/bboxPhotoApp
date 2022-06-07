@@ -71,59 +71,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        // init preferences manager class
         PrefsManager.init(this);
+
+        // initialize JSON object
+        JSONManager.initJSON(this);
         
         //if(savedInstanceState == null) { addLoginFragment(); }
-
-        // init views
+        
         previewView = findViewById(R.id.previewView);
         bboxView = findViewById(R.id.bboxView);
-
-        // adjustment indicators
-        imgViewTopLeft = findViewById(R.id.imgViewTopLeft);
-        imgViewBottomRight = findViewById(R.id.imgViewBottomRight);
-
-        // spinner for choosing image classification
-        classSpinner = findViewById(R.id.classSpinner);
-
-        // init adjustment indicator locations after bboxView initializes dimensions
-        bboxView.post(() -> {
-            // image center
-            xCenter = imgViewTopLeft.getWidth() / 2;
-            yCenter = imgViewTopLeft.getHeight() / 2;
-
-            // bbox dims
-            int[] topLeft = bboxView.getTopLeft();
-            int[] bottomRight = bboxView.getBottomRight();
-
-            // set top left coordinates
-            imgViewTopLeft.setX(topLeft[0] - xCenter);
-            imgViewTopLeft.setY(topLeft[1] - yCenter);
-
-            // set bottom right coordinates
-            imgViewBottomRight.setX(bottomRight[0] - xCenter);
-            imgViewBottomRight.setY(bottomRight[1] - yCenter);
-        });
         
-        // init buttons
+        // buttons
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnViewImage = findViewById(R.id.btnViewImage);
         btnAddClass = findViewById(R.id.btnAddClass);
         btnOptions = findViewById(R.id.btnOptionsMenu);
+
+        // spinner for choosing image classification
+        classSpinner = findViewById(R.id.classSpinner);
         
-        // get storage permissions
-        if(!Utils.hasStoragePermissions(this)) {
-            Utils.requestStoragePermissions(this);
-        }
-
-        // get camera permissions
-        if(!Utils.hasCameraPermissions(this)) {
-            Utils.requestCameraPermissions(this);
-        }
-
-        // initialize JSON object if it exists in storage
-        JSONManager.initJSON(this);
-
+        // init adjustment indicator locations after bboxView initializes dimensions
+        bboxView.post(() -> {
+            initImageViews();
+        });
+        
         // try to set preview image for btnViewImage
         try{
             this.btnViewImage.setImageURI(JSONManager.getHeadImageUri());
@@ -149,10 +121,6 @@ public class MainActivity extends AppCompatActivity {
         btnAddClass.setOnClickListener(view -> {
             createDialog();
         });
-
-        // init listeners on image views; allows user to readjust bbox size
-        imgViewTopLeft.setOnTouchListener(getOtl(0));
-        imgViewBottomRight.setOnTouchListener(getOtl(1));
         
         // view images activity button listener
         btnViewImage.setOnClickListener(view -> {
@@ -161,13 +129,44 @@ public class MainActivity extends AppCompatActivity {
 
         // set listener on floating action button
         btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
+                this,
                 bboxView.getBbox(),
-                spAdapter.getClassName())); // gets class name from spinner adapter
+                spAdapter.getClassName()));
         
         // start settings activity
         btnOptions.setOnClickListener(view -> {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         });
+    }
+
+    /**
+     * Initializes the image view adjustment indicators for the bounding box
+     * 
+     */
+    private void initImageViews() {
+        // adjustment indicators
+        imgViewTopLeft = findViewById(R.id.imgViewTopLeft);
+        imgViewBottomRight = findViewById(R.id.imgViewBottomRight);
+
+        // image center
+        xCenter = imgViewTopLeft.getWidth() / 2;
+        yCenter = imgViewTopLeft.getHeight() / 2;
+
+        // bbox dims
+        int[] topLeft = bboxView.getTopLeft();
+        int[] bottomRight = bboxView.getBottomRight();
+
+        // set top left coordinates
+        imgViewTopLeft.setX(topLeft[0] - xCenter);
+        imgViewTopLeft.setY(topLeft[1] - yCenter);
+
+        // set bottom right coordinates
+        imgViewBottomRight.setX(bottomRight[0] - xCenter);
+        imgViewBottomRight.setY(bottomRight[1] - yCenter);
+
+        // init listeners on image views; allows user to readjust bbox size
+        imgViewTopLeft.setOnTouchListener(getOtl(0));
+        imgViewBottomRight.setOnTouchListener(getOtl(1));
     }
 
     /**
@@ -179,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
      * @param img 0: top left; 1: bottom right
      * @return View.OnTouchListener object
      */
-    public View.OnTouchListener getOtl(int img) {
+    private View.OnTouchListener getOtl(int img) {
 
         View.OnTouchListener otl = new View.OnTouchListener() {
 
@@ -262,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
      * class spinner object.
      * 
      */
-    public void createDialog() {
+    private void createDialog() {
         dialogBuilder = new AlertDialog.Builder(this);
         final View dialogView = getLayoutInflater().inflate(R.layout.class_prompt, null);
         

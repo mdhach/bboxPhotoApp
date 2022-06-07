@@ -40,10 +40,8 @@ import java.util.Set;
 public class CameraController {
 
     private static final String TAG = "CameraController";
-
-    private Context context;
+    
     private PreviewView previewView;
-    private Activity activity;
 
     // camera variables
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -55,32 +53,40 @@ public class CameraController {
      * @param context the current context
      */
     public CameraController(Context context) {
-        this.context = context;
-        this.activity = Utils.getActivity(this.context);
-        this.previewView = this.activity.findViewById(R.id.previewView);
+        this.previewView = Utils.getActivity(context).findViewById(R.id.previewView);
+        
+        // get storage permissions
+        if(!Utils.hasStoragePermissions(context)) {
+            Utils.requestStoragePermissions(context);
+        }
+
+        // get camera permissions
+        if(!Utils.hasCameraPermissions(context)) {
+            Utils.requestCameraPermissions(context);
+        }
 
         // access camera and start-up camera
-        startCamera();
+        startCamera(context);
     }
 
     /**
      * Initializes the camera instance.
      *
      */
-    private void startCamera() {
+    private void startCamera(Context context) {
         // create camera instance
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this.context);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(context);
 
         // add camera listener
         cameraProviderFuture.addListener(() -> {
             try {
                 // get camera instance and bind it to a preview
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                bindPreview(cameraProvider);
+                bindPreview(cameraProvider, Utils.getActivity(context));
             } catch(Exception e) {
                 e.printStackTrace();
             }
-        }, ContextCompat.getMainExecutor(this.context));
+        }, ContextCompat.getMainExecutor(context));
     }
 
     /**
@@ -88,7 +94,7 @@ public class CameraController {
      *
      * @param cameraProvider camera instance within the current context
      */
-    private void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
+    private void bindPreview(@NonNull ProcessCameraProvider cameraProvider, Activity activity) {
         // builds an immutable camera preview
         Preview preview = new Preview.Builder().build();
 
@@ -109,7 +115,7 @@ public class CameraController {
         // bind image capture object to current camera instance.
         // starts data capture; opens camera preview for end-user
         cameraProvider.bindToLifecycle(
-                (LifecycleOwner) this.activity,
+                (LifecycleOwner) activity,
                 cameraSelector,
                 imageCapture,
                 preview);
@@ -122,10 +128,10 @@ public class CameraController {
      * @param bbox the image bbox coordinates
      * @param className the image classification name
      */
-    public void takePhoto(int[] bbox,  String className) {
+    public void takePhoto(Context context, int[] bbox,  String className) {
         // take picture; toast messages for confirmation
-        imageCapture.takePicture(getOutputOptions(),
-                ContextCompat.getMainExecutor(this.activity),
+        imageCapture.takePicture(getOutputOptions(Utils.getActivity(context)),
+                ContextCompat.getMainExecutor(Utils.getActivity(context)),
                 new ImageCapture.OnImageSavedCallback() {
 
             @Override
@@ -136,6 +142,8 @@ public class CameraController {
                         className,
                         bbox);
 
+                Log.d(TAG, "M/takePhoto: uri " + outputFileResults.getSavedUri());
+                
                 // toast notification on image capture success
                 Toast.makeText(context,
                         "Image saved",
@@ -161,7 +169,7 @@ public class CameraController {
      *
      * @return ImageCapture.OutputFileOptions object with custom metadata
      */
-    private @NonNull ImageCapture.OutputFileOptions getOutputOptions() {
+    private @NonNull ImageCapture.OutputFileOptions getOutputOptions(Activity activity) {
         // output image name; current date and time
         String outputName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
                 Locale.getDefault()).format(new Date());
@@ -172,13 +180,10 @@ public class CameraController {
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
         contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM);
 
-        // set image capture output options
-        ImageCapture.OutputFileOptions outputFileOptions =
-                new ImageCapture.OutputFileOptions.Builder(
-                        this.activity.getContentResolver(),
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        contentValues).build();
-
-        return outputFileOptions;
+        // return image capture output options
+        return new ImageCapture.OutputFileOptions.Builder(
+                activity.getContentResolver(),
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues).build();
     }
 }

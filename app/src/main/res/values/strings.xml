@@ -8,16 +8,18 @@
     <string name="btn_addClass">Add Class</string>
     
     <!-- Confirmation Dialog Titles (cdt) -->
-    <string name="cdt_zip_files">Confirm Action</string>
+    <string name="cdt_title">Confirm Action</string>
     
     <!-- Confirmation Dialog Messages (cdm) -->
     <string name="cdm_zip_files">Would you like to zip files?</string>
+    <string name="cdm_reinit_json">Would you like to reinitialize your JSON file?</string>
     
     <!-- File name -->
     <string name="default_json_name">ImageBboxInfo.json</string>
     
     <!-- Default save location key -->
     <string name="save_location_key">SAVE_LOCATION_KEY</string>
+    <string name="img_dir_key">IMAGE_DIRECTORY_KEY</string>
     
     <!-- Default save name key and value -->
     <string name="save_name_key">SAVE_NAME_KEY</string>
