@@ -26,6 +26,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Used to statically access and perform operations on the main JSON object or file.
+ * 
+ */
 public final class JSONManager {
 
     private static final String TAG = "JSONManager";
@@ -47,14 +51,10 @@ public final class JSONManager {
     public static void initJSON(Context context) {
         String JSONName = context.getString(R.string.default_json_name);
         String sourcePath = PrefsManager.getValue(PrefsManager.saveLocKey);
-        
-        JSONFile = new File(sourcePath, JSONName); // JSON file (path, name)
 
+        JSONFile = new File(sourcePath, JSONName); // JSON file (path, name)
+        
         if(JSONFile.exists()) {
-            
-            Log.d(TAG, "M/initJSON: getParent() - " + JSONFile.getParent());
-            Log.d(TAG, "M/initJSON: getName() - " + JSONFile.getName());
-            
             String strToJSON; // JSON as string
 
             // try loading local JSON file
@@ -74,10 +74,15 @@ public final class JSONManager {
                 br.close(); // close buffered reader
 
                 strToJSON = sb.toString(); // saves parsed JSON file to string object
-
-                JSONMain = new JSONObject(strToJSON); // init JSONMain with parsed string
-
-                //verifyJSON(context); // verifies JSONMain contents
+                
+                JSONMain = new JSONObject(strToJSON); // init main with file
+                
+                Log.d(TAG, "M/initJSON: JSONMain instantiated.");
+                
+                // set image button uri if not set
+                if(headImageUri == null) {
+                    initHeadImageUri(context);
+                }
             } catch(JSONException | IOException e) {
                 // file exists but is likely empty...
                 JSONMain = new JSONObject();
@@ -85,55 +90,45 @@ public final class JSONManager {
                 Log.d(TAG, "M/initJSON: JSONException or IOException thrown...");
                 Log.d(TAG, "M/initJSON: " + e.getMessage());
             }
-        } else { JSONMain = new JSONObject(); }
+        } else {
+            JSONMain = new JSONObject();
+            Log.d(TAG, "M/initJSON: JSONFile does not exist...");
+            Log.d(TAG, "M/initJSON: Instantiating JSONMain...");
+        }
     }
 
     /**
-     * Updates JSON file by removing image entries that were deleted by the user.
-     * 
-     * Called in initJSON() method.
-     * 
-     * (Temporarily disabled in case user deletes images after compressing them to a zip file,
-     * but also wants to keep the data stored in the JSON file).
+     * Initializes an arbitrary image that is display as the ViewImageActivity button
+     * in the main activity.
      *
-     * @param context the current context
+     * @param context current context
      */
-    public static void verifyJSON(Context context) {
-        Uri id; // uri path counter
-        File file; // file to store uri path
-        String key; // uri id counter
-        List<String> keys = new ArrayList<>(); // stores the ids of current images in MediaStore
+    private static void initHeadImageUri(Context context) {
+        Cursor cursor = getImageCursor(context); // cursor directed at MediaStore
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI; // content path
+        String id = MediaStore.Images.Media._ID; // static id field
 
-        // columns to retrieve
-        String[] projection = {MediaStore.Images.Media._ID};
-
-        // the uri path to the primary external storage volume
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        // how the query is sorted
-        String sortOrder = MediaStore.Images.Media.DEFAULT_SORT_ORDER;
-
-        // query all MediaStore images
-        Cursor cursor = context.getContentResolver().query(
-                uri, projection, null, null, sortOrder);
-
-        // iterates through all MediaStore images
-        while(cursor.moveToNext()) {
-            id = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    cursor.getInt(
-                            cursor.getColumnIndexOrThrow(
-                                    MediaStore.Images.Media._ID)));
-
-            // stores the uri of the first image.
-            // used as the preview image for btnImage in Main
-            if(headImageUri == null) { headImageUri = id; }
-
-            file = new File(id.getPath()); // store file at the uri path
-            keys.add(file.getName()); // add the ID of the file to the keys list
+        try {
+            if(cursor.moveToFirst()) {
+                headImageUri = ContentUris.withAppendedId(
+                        uri, cursor.getInt(cursor.getColumnIndexOrThrow(id)));
+            }
+            cursor.close();
+        } catch(Exception e) {
+            Log.d(TAG, "M/initHeadImageUri: Null...");
+            Log.d(TAG, "M/initHeadImageUri: " + e.getMessage());
         }
+    }
 
-        cursor.close();
+    /**
+     * Cleans JSON of deleted images.
+     * 
+     * Refers to the images stored in the MediaStore directory.
+     *
+     * @param keys list of uri keys
+     */
+    public static void cleanJSON(List<String> keys) {
+        String key; // uri id counter
 
         Iterator<String> iterator = JSONMain.keys();
 
@@ -146,7 +141,6 @@ public final class JSONManager {
             }
         }
     }
-
 
     /**
      * Saves image information to main JSON
@@ -174,7 +168,7 @@ public final class JSONManager {
             Log.d(TAG, "M/saveToJSON: JSONException...");
             Log.d(TAG, "M/saveToJSON: " + e.getMessage());
         }
-
+        
     }
 
     /**
@@ -189,74 +183,11 @@ public final class JSONManager {
             BufferedWriter bw = new BufferedWriter(fw); // write file as char-input stream
             bw.write(jsonToStr); // write char-input stream to output file: "ImageBboxInfo.json"
             bw.close(); // close BufferedWriter object
+            Log.d(TAG, "M/saveJSONAsFile: JSONFile saved to " + JSONFile.getParent());
         } catch (IOException e) {
             Log.d(TAG, "M/saveJSONAsFile: IOException...");
             Log.d(TAG, "M/saveJSONAsFile: " + e.getMessage());
         }
-    }
-
-    /**
-     * Returns the display name of an image using its uri.
-     * Returns null if the display name could not be found.
-     *
-     * @param context the current context
-     * @param uri the image uri
-     * @return the image name
-     */
-    public static String getImageName(Context context, Uri uri) {
-        String imageName = null;
-
-        if(uri.getScheme().equalsIgnoreCase("content")) {
-            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-            try{
-                if(cursor != null && cursor.moveToFirst()) {
-                    imageName = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                    cursor.close();
-                }
-            } catch(Exception e) {
-                Log.d(TAG, "M/getImageName: Null or out of bounds...");
-                Log.d(TAG, "M/getImageName: " + e.getMessage());
-            }
-        }
-        return imageName;
-    }
-
-    /**
-     * Returns the uri of the first image indexed by the JSON verification process.
-     *
-     * @return uri of the first image indexed
-     */
-    public static Uri getHeadImageUri() { return headImageUri; }
-
-    /**
-     * Gets all the current images in JSONMain and returns them in an
-     * ArrayList of ImageObjects.
-     * 
-     * @return ArrayList of ImageObjects
-     */
-    public static ArrayList<ImageObject> getImageObjectArray() {
-        ArrayList<ImageObject> arr = new ArrayList<>();
-        
-        if(JSONMain != null) {
-            JSONObject jsonObject;
-            
-            String key;
-            Iterator<String> iterator = JSONMain.keys();
-
-            while(iterator.hasNext()) {
-                key = iterator.next();
-                try{
-                    if(JSONMain.get(key) instanceof JSONObject) {
-                        jsonObject = JSONMain.getJSONObject(key);
-                        arr.add(JSONToImageObject(jsonObject));
-                    }
-                } catch(JSONException e) {
-                    Log.d(TAG, "M/getImageObjectArray: JSONException...");
-                    Log.d(TAG, "M/getImageObjectArray: " + e.getMessage());
-                }
-            }
-        }
-        return arr;
     }
 
     /**
@@ -294,22 +225,139 @@ public final class JSONManager {
     }
 
     /**
-     * Returns the application JSON as a File object.
-     * 
-     * @return File the application JSON
+     * Get the display name of an image using its uri.
+     *
+     * @param context the current context
+     * @param uri the image uri
+     * @return String image name; default is null
      */
-    public static File getJSONFile() {
-        return JSONFile;
+    public static String getImageName(Context context, Uri uri) {
+        String imageName = null; // name of image
+        String _id = OpenableColumns.DISPLAY_NAME; // static id field
+
+        if(uri.getScheme().equalsIgnoreCase("content")) {
+            Cursor cursor = context.getContentResolver().query(
+                    uri, 
+                    null, 
+                    null, 
+                    null, 
+                    null);
+            try{
+                if(cursor.moveToFirst()) {
+                    imageName = cursor.getString(cursor.getColumnIndexOrThrow(_id));
+                }
+                cursor.close();
+            } catch(Exception e) {
+                Log.d(TAG, "M/getImageName: Null or out of bounds...");
+                Log.d(TAG, "M/getImageName: " + e.getMessage());
+            }
+        }
+        return imageName;
     }
 
     /**
-     * debug;;;;;;;;
-     * check if main json is null;;;;;;;;;;;;'''////////
-     * ;;;;//;;[[]]]]][[[[[]]]]]]
+     * Gets a cursor to iterate through the images stored in MediaStore (DCIM).
      * 
-     * @return true if null; false otherwise
+     * Sorts images by default; by their display names.
+     * 
+     * @param context current context
+     * @return Cursor object directed at the MediaStore directory (DCIM)
      */
-    public static boolean isMainNull() {
-        return JSONMain == null;
+    public static Cursor getImageCursor(Context context) {
+        // columns to retrieve
+        String[] projection = {MediaStore.Images.Media._ID};
+
+        // the uri path to the primary external storage volume
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        // how the query is sorted
+        String sortOrder = MediaStore.Images.Media.DEFAULT_SORT_ORDER;
+
+        // query all MediaStore images; return cursor
+        return context.getContentResolver().query(
+                uri, 
+                projection, 
+                null, 
+                null, 
+                sortOrder);
     }
+
+    /**
+     * Gets a list of keys to access the images in MediaStore.
+     * 
+     * @param context current context
+     * @return String List of MediaStore keys
+     */
+    public static List<String> getImageKeys(Context context) {
+        Cursor cursor = getImageCursor(context); // cursor directed at MediaStore
+        Uri id; // uri path counter
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI; // content path
+        String _id = MediaStore.Images.Media._ID; // static id field
+        File file; // file to store uri path
+        List<String> keys = new ArrayList<>(); // stores the ids of current images in MediaStore
+        
+        // iterates through all MediaStore images
+        while(cursor.moveToNext()) {
+            id = ContentUris.withAppendedId(
+                    uri, cursor.getInt(cursor.getColumnIndexOrThrow(_id)));
+
+            // stores the uri of the first image.
+            // used as the preview image for btnImage in Main
+            if(headImageUri == null) { headImageUri = id; }
+
+            file = new File(id.getPath()); // store file at the uri path
+            keys.add(file.getName()); // add the ID of the file to the keys list
+        }
+        
+        cursor.close();
+        
+        return keys;
+    }
+    
+    /**
+     * Gets all the current images in JSONMain and returns them in an
+     * ArrayList of ImageObjects.
+     * 
+     * @return ArrayList of ImageObjects
+     */
+    public static ArrayList<ImageObject> getImageObjectArray() {
+        ArrayList<ImageObject> arr = new ArrayList<>();
+        
+        if(JSONMain != null) {
+            JSONObject jsonObject;
+            
+            String key;
+            Iterator<String> iterator = JSONMain.keys();
+
+            while(iterator.hasNext()) {
+                key = iterator.next();
+                try{
+                    if(JSONMain.get(key) instanceof JSONObject) {
+                        jsonObject = JSONMain.getJSONObject(key);
+                        arr.add(JSONToImageObject(jsonObject));
+                    }
+                } catch(JSONException e) {
+                    Log.d(TAG, "M/getImageObjectArray: JSONException...");
+                    Log.d(TAG, "M/getImageObjectArray: " + e.getMessage());
+                }
+            }
+        }
+        return arr;
+    }
+
+    /**
+     * Checks if either JSONFile exists or JSONMain is null.
+     * 
+     * @return true if JSONFile and JSONMain exists; false otherwise.
+     */
+    public static boolean isMainAlive() {
+        return JSONFile.exists() && JSONMain != null;
+    }
+
+    /**
+     * Returns the uri of the first image indexed by the JSON verification process.
+     *
+     * @return uri of the first image indexed
+     */
+    public static Uri getHeadImageUri() { return headImageUri; }
 }

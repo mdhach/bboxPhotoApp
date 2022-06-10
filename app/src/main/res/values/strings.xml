@@ -12,7 +12,16 @@
     
     <!-- Confirmation Dialog Messages (cdm) -->
     <string name="cdm_zip_files">Would you like to zip files?</string>
-    <string name="cdm_reinit_json">Would you like to reinitialize your JSON file?</string>
+    <string name="cdm_clean_json">Would you like to clean your JSON file?</string>
+    <string name="cdm_renew_json">Would you like to recreate your JSON file?</string>
+    <string name="cdm_reset">Would you like to reset settings to default?</string>
+    
+    <!-- Confirmation Dialog Info (cdi) -->
+    <string name="cdi_renew_json">This will recreate your JSON file. Use if the file was removed.</string>
+    <string name="cdi_reset">This will reset all your current settings.</string>
+    
+    <!-- Confirmation Dialog Warnings (cdw) -->
+    <string name="cdw_clean_json">This will erase the data of any images that are not currently within your image directory.</string>
     
     <!-- File name -->
     <string name="default_json_name">ImageBboxInfo.json</string>
@@ -23,7 +32,7 @@
     
     <!-- Default save name key and value -->
     <string name="save_name_key">SAVE_NAME_KEY</string>
-    <string name="default_save_name_val">out_IMAGES</string>
+    <string name="default_save_name_val">output_IMAGES</string>
     
     <!-- Request Keys (rq) -->
     <string name="rq_confirmation">CONFIRMATION_REQUEST_KEY</string>

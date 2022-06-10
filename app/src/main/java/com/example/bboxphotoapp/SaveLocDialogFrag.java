@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +21,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
- * Creates a dialog fragment that changes the save location of the output zip file.
+ * Creates a dialog fragment that changes the save location of the zip and JSON file.
  * 
  */
 public class SaveLocDialogFrag extends AppCompatDialogFragment {
@@ -31,6 +35,7 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
     private Button saveLocation;
     private String requestKey;
     private String bundleKey;
+    private String newPath = null;
 
     private final ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -40,11 +45,23 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                     if(result.getResultCode() == Activity.RESULT_OK) {
                         Intent resultIntent = result.getData();
                         if (resultIntent != null) {
+                            // convert uri to document uri
                             Uri uri = resultIntent.getData();
-                            saveLocation.setText(String.valueOf(uri));
-                            Log.d(TAG, "V/resultLauncher: new path " + uri);
+                            String id = DocumentsContract.getTreeDocumentId(uri);
+                            Uri docUri = DocumentsContract.buildDocumentUriUsingTree(uri, id);
+                            
+                            // get real path
+                            newPath = Utils.getPath(requireContext(), docUri);
+                            
+                            // set button text to relative path
+                            String relativePath = Utils.getRelativePath(newPath);
+                            saveLocation.setText(relativePath);
+                            
+                            // logs for checking old and new path
+                            Log.d(TAG, "V/resultLauncher: old path " + PrefsManager.getValue(PrefsManager.saveLocKey));
+                            Log.d(TAG, "V/resultLauncher: new path " + newPath);
                         } else {
-                            Log.d(TAG, "V/resultLauncher: Intent or uri is invalid");
+                            Log.d(TAG, "V/resultLauncher: Invalid intent...");
                         }
                     }
                 }
@@ -59,7 +76,10 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.save_location_dialog_fragment, null);
         
         saveLocation = view.findViewById(R.id.changeSaveLocation);
-        saveLocation.setText(PrefsManager.getValue(PrefsManager.saveNameKey));
+
+        String currentPath = Utils.getRelativePath(PrefsManager.getValue(PrefsManager.saveLocKey));
+        
+        saveLocation.setText(currentPath);
 
         requestKey = getString(R.string.rq_save_location);
         bundleKey = getString(R.string.bn_save_location);
@@ -74,13 +94,21 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                 .setTitle("Change save location")
                 
                 .setNegativeButton("Cancel", ((dialogInterface, i) -> {
-                    Log.i(TAG, "M/onCreateDialog: cancel");
+                    Log.d(TAG, "M/onCreateDialog: cancel");
                 }))
                 
                 .setPositiveButton("Confirm", ((dialogInterface, i) -> {
-                    // init bundle with new save location
                     Bundle bundle = new Bundle();
-                    bundle.putString(bundleKey, saveLocation.getText().toString());
+                    
+                    if(newPath != null) {
+                        // add new path to bundle
+                        Log.d(TAG, "M/onCreateDialog: added newPath to bundle " + newPath);
+                        bundle.putString(bundleKey, newPath);
+                    } else {
+                        // else add current path if no new path was set
+                        Log.d(TAG, "M/onCreateDialog: newPath null; added current path");
+                        bundle.putString(bundleKey, currentPath);
+                    }
                     
                     // pass bundle to parent activity
                     getParentFragmentManager().setFragmentResult(requestKey, bundle);
@@ -88,7 +116,7 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                     // confirmation toast
                     Toast.makeText(requireActivity(), "New location set!", Toast.LENGTH_SHORT).show();
 
-                    Log.i(TAG, "M/onCreateDialog: confirm");
+                    Log.d(TAG, "M/onCreateDialog: confirm");
                 }));
         
         return builder.create();

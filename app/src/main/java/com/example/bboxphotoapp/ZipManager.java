@@ -17,7 +17,7 @@ import java.util.zip.ZipOutputStream;
  *  
  *      https://stackoverflow.com/a/53960424/15224280
  *      
- * Zips file at given path or recursively zips all files if argument is a directory.
+ * Zips file at given path; recursively zips all files if argument is a directory.
  * 
  */
 public class ZipManager {
@@ -50,7 +50,7 @@ public class ZipManager {
      * @return true if process completes; false if an exception was thrown
      */
     public boolean zip() {
-        // create new zip file; saves at arg0 (saveLocation) with name arg1 (zipName)
+        // create new zip file; saves at saveLocation with name zipName
         File zipFile = new File(saveLocation, zipName);
         
         try {
@@ -78,35 +78,39 @@ public class ZipManager {
         
         final int BUFFER = 2048;
         
-        try {
-            for(File file : fileList) {
-                if(file.isDirectory()) {
-                    zipSubDir(out, file);
-                } else {
-                    byte[] data = new byte[BUFFER];
-                    
-                    String unmodifiedFilePath = file.getPath();
-                    int lastIdx = unmodifiedFilePath.lastIndexOf("/") + 1;
-                    String relativePath = unmodifiedFilePath.substring(lastIdx);
-                    
-                    FileInputStream fi = new FileInputStream(unmodifiedFilePath);
-                    origin = new BufferedInputStream(fi, BUFFER);
-                    
-                    ZipEntry entry = new ZipEntry(relativePath);
-                    entry.setTime(file.lastModified());
-                    out.putNextEntry(entry);
-                    
-                    int count;
-                    while((count=origin.read(data, 0, BUFFER)) != -1) {
-                        out.write(data, 0, count);
+        if(fileList != null) {
+            try {
+                for(File file : fileList) {
+                    if(file.isDirectory()) {
+                        zipSubDir(out, file);
+                    } else {
+                        byte[] data = new byte[BUFFER];
+
+                        String unmodifiedFilePath = file.getPath();
+                        int lastIdx = unmodifiedFilePath.lastIndexOf("/") + 1;
+                        String relativePath = unmodifiedFilePath.substring(lastIdx);
+
+                        FileInputStream fi = new FileInputStream(unmodifiedFilePath);
+                        origin = new BufferedInputStream(fi, BUFFER);
+
+                        ZipEntry entry = new ZipEntry(relativePath);
+                        entry.setTime(file.lastModified());
+                        out.putNextEntry(entry);
+
+                        int count;
+                        while((count=origin.read(data, 0, BUFFER)) != -1) {
+                            out.write(data, 0, count);
+                        }
+                        origin.close();
+                        out.closeEntry();
                     }
-                    origin.close();
-                    out.closeEntry();
                 }
+            } catch(IOException e) {
+                Log.d(TAG, "M/zipSubDir: IOException...");
+                Log.d(TAG, "M/zipSubDir: " + e.getMessage());
             }
-        } catch(IOException e) {
-            Log.d(TAG, "M/zipSubDir: IOException...");
-            Log.d(TAG, "M/zipSubDir: " + e.getMessage());
+        } else {
+            Log.d(TAG, "M/zipSubDir: No images found.");
         }
     }
 }

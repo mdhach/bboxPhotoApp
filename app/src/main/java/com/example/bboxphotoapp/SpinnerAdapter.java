@@ -15,6 +15,12 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
+/**
+ * Custom ArrayAdapter for the spinner object in the main activity.
+ * 
+ * Allows the user to select, create, or delete classification IDs.
+ * 
+ */
 public class SpinnerAdapter extends ArrayAdapter<String> {
 
     private static final String TAG = "SpinnerAdapter";

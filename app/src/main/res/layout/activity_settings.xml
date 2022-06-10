@@ -23,16 +23,28 @@
         android:text="Change Save Location"/>
     
     <Button
-        android:id="@+id/settings_init_json"
+        android:id="@+id/settings_clean_json"
         android:layout_width="match_parent"
         android:layout_height="60dp" 
-        android:text="Reinitialize JSON File"/>
+        android:text="Cleanup JSON File"/>
+
+    <Button
+        android:id="@+id/settings_renew_json"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Renew JSON File"/>
     
     <Button
         android:id="@+id/settings_zip_files"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="Zip Files"/>
+
+    <Button
+        android:id="@+id/settings_reset"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Reset Default Settings"/>
 
     <TextView
         android:id="@+id/settings_info"

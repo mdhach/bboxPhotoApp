@@ -2,11 +2,8 @@ package com.example.bboxphotoapp;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     
-    private CameraController cc; // camera object; used to take photos
+    private CameraController cameraController; // camera object; used to take photos
     
     // fragment objects
     private Fragment fragment;
@@ -70,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        // init preferences manager class
+
+        // init SharedPreferences manager
         PrefsManager.init(this);
 
         // initialize JSON object
@@ -79,17 +76,8 @@ public class MainActivity extends AppCompatActivity {
         
         //if(savedInstanceState == null) { addLoginFragment(); }
         
-        previewView = findViewById(R.id.previewView);
-        bboxView = findViewById(R.id.bboxView);
-        
-        // buttons
-        btnTakePhoto = findViewById(R.id.btnTakePhoto);
-        btnViewImage = findViewById(R.id.btnViewImage);
-        btnAddClass = findViewById(R.id.btnAddClass);
-        btnOptions = findViewById(R.id.btnOptionsMenu);
-
-        // spinner for choosing image classification
-        classSpinner = findViewById(R.id.classSpinner);
+        // init view ids
+        initViews();
         
         // init adjustment indicator locations after bboxView initializes dimensions
         bboxView.post(() -> {
@@ -100,11 +88,12 @@ public class MainActivity extends AppCompatActivity {
         try{
             this.btnViewImage.setImageURI(JSONManager.getHeadImageUri());
         } catch(Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, "M/onCreate: Image not found...");
+            Log.d(TAG, "M/onCreate: " + e.getMessage());
         }
 
         // initialize camera controller object
-        cc = new CameraController(this);
+        cameraController = new CameraController(this);
         
         // initialize spinner adapter with an array of default
         spAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_item, 
@@ -128,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // set listener on floating action button
-        btnTakePhoto.setOnClickListener(view -> cc.takePhoto(
+        btnTakePhoto.setOnClickListener(view -> cameraController.takePhoto(
                 this,
                 bboxView.getBbox(),
                 spAdapter.getClassName()));
@@ -137,6 +126,44 @@ public class MainActivity extends AppCompatActivity {
         btnOptions.setOnClickListener(view -> {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // check if PrefsManager still contains a reference to SharedPreferences
+        if(!PrefsManager.hasReference()) {
+            Log.d(TAG, "M/onResume: No reference to SharedPreferences found...");
+            Log.d(TAG, "M/onResume: Reinitializing PrefsManager...");
+            PrefsManager.init(this);
+        }
+        
+        // check if JSONFile and JSONMain still exists
+        if(!JSONManager.isMainAlive()) {
+            Log.d(TAG, "M/onResume: JSONFile and/or JSONMain are null.");
+            Log.d(TAG, "M/onResume: Reinstantiating JSONFile and/or JSONMain...");
+            JSONManager.initJSON(this);
+        }
+    }
+
+    /**
+     * Initializes main views with their corresponding IDs
+     * 
+     */
+    private void initViews() {
+        // general views
+        previewView = findViewById(R.id.previewView);
+        bboxView = findViewById(R.id.bboxView);
+
+        // buttons
+        btnTakePhoto = findViewById(R.id.btnTakePhoto);
+        btnViewImage = findViewById(R.id.btnViewImage);
+        btnAddClass = findViewById(R.id.btnAddClass);
+        btnOptions = findViewById(R.id.btnOptionsMenu);
+
+        // spinner for choosing image classification
+        classSpinner = findViewById(R.id.classSpinner);
     }
 
     /**
@@ -180,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private View.OnTouchListener getOtl(int img) {
 
-        View.OnTouchListener otl = new View.OnTouchListener() {
+        return new View.OnTouchListener() {
 
             // the current active pointer; used for multi-touch events
             private int activePointerId = INVALID_POINTER_ID;
@@ -253,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         };
-        return otl; // return listener object
     }
 
     /**

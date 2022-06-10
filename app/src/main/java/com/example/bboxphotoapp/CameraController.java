@@ -36,7 +36,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-
+/**
+ * Class used to initialize and manage the camera.
+ * 
+ */
 public class CameraController {
 
     private static final String TAG = "CameraController";

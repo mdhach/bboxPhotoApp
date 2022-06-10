@@ -44,7 +44,10 @@ public class ViewImageActivity extends AppCompatActivity {
         
         // controls the layout of the adapter.
         // horizontal: scroll left/right to see previous/next image
-        imagesRecView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        imagesRecView.setLayoutManager(new LinearLayoutManager(
+                this, 
+                LinearLayoutManager.HORIZONTAL, 
+                false));
         
         // set listener to end activity on click
         btnBack.setOnClickListener(view -> finish());

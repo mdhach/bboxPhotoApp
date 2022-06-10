@@ -18,17 +18,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+/**
+ * Custom RecyclerView adapter used for displaying images.
+ * 
+ */
 public class ImageRecViewAdapter extends RecyclerView.Adapter<ImageRecViewAdapter.ViewHolder> {
 
     private static final String TAG = "ImageRecViewAdapter";
     
     private ArrayList<ImageObject> imageObjects;
-
-    /**
-     * Constructor. Allows user to initialize the ImageObject ArrayList
-     * via argument.
-     *
-     */
+    
     public ImageRecViewAdapter(ArrayList<ImageObject> imageObjects) {
         this.imageObjects = imageObjects;
     }

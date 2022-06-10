@@ -49,6 +49,7 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
         builder.setNegativeButton("Cancel", ((dialogInterface, i) -> {
             bundle.putBoolean(bundleKey, false);
             getParentFragmentManager().setFragmentResult(requestKey, bundle);
+            
             Log.i(TAG, "M/onCreateDialog: cancel");
         }));
         

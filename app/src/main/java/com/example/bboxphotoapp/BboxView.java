@@ -12,6 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 
+/**
+ * Custom view that creates an adjustable bounding box for the main layout.
+ * 
+ */
 public class BboxView extends AppCompatImageView {
 
     private static final String TAG = "BboxView";

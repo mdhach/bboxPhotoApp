@@ -86,7 +86,6 @@
         android:contentDescription="@string/btn_btnTakePhoto"
         android:src="@drawable/ic_action_take_photo"
         android:backgroundTint="@color/dark_gray"
-        android:outlineSpotShadowColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
@@ -99,8 +98,8 @@
         android:contentDescription="@string/btn_btnViewImages"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="32dp"
-        android:layout_marginEnd="75dp"
-        app:layout_constraintLeft_toRightOf="@id/btnTakePhoto"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintLeft_toRightOf="@id/vertical_center_line"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <ImageButton
