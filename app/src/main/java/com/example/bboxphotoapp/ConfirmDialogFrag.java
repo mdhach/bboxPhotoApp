@@ -50,14 +50,14 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
             bundle.putBoolean(bundleKey, false);
             getParentFragmentManager().setFragmentResult(requestKey, bundle);
             
-            Log.i(TAG, "M/onCreateDialog: cancel");
+            Log.d(TAG, "M/onCreateDialog: action cancel");
         }));
         
         builder.setPositiveButton("Confirm", ((dialogInterface, i) -> {
             bundle.putBoolean(bundleKey, true);
             getParentFragmentManager().setFragmentResult(requestKey, bundle);
             
-            Log.i(TAG, "M/onCreateDialog: confirm");
+            Log.d(TAG, "M/onCreateDialog: action confirm");
         }));
         
         return builder.create();

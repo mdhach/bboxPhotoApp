@@ -43,6 +43,8 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if(result.getResultCode() == Activity.RESULT_OK) {
+                        Log.d(TAG, "V/resultLauncher: action confirm");
+                        
                         Intent resultIntent = result.getData();
                         if (resultIntent != null) {
                             // convert uri to document uri
@@ -63,6 +65,8 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                         } else {
                             Log.d(TAG, "V/resultLauncher: Invalid intent...");
                         }
+                    } else {
+                        Log.d(TAG, "V/resultLauncher: action deny");
                     }
                 }
             }
@@ -94,7 +98,7 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                 .setTitle("Change save location")
                 
                 .setNegativeButton("Cancel", ((dialogInterface, i) -> {
-                    Log.d(TAG, "M/onCreateDialog: cancel");
+                    Log.d(TAG, "M/onCreateDialog: action cancel");
                 }))
                 
                 .setPositiveButton("Confirm", ((dialogInterface, i) -> {
@@ -109,14 +113,10 @@ public class SaveLocDialogFrag extends AppCompatDialogFragment {
                         Log.d(TAG, "M/onCreateDialog: newPath null; added current path");
                         bundle.putString(bundleKey, currentPath);
                     }
-                    
                     // pass bundle to parent activity
                     getParentFragmentManager().setFragmentResult(requestKey, bundle);
-                    
-                    // confirmation toast
-                    Toast.makeText(requireActivity(), "New location set!", Toast.LENGTH_SHORT).show();
 
-                    Log.d(TAG, "M/onCreateDialog: confirm");
+                    Log.d(TAG, "M/onCreateDialog: action confirm");
                 }));
         
         return builder.create();

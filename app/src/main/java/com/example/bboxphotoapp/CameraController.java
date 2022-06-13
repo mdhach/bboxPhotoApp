@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Size;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ResolutionInfo;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
@@ -122,6 +124,17 @@ public class CameraController {
                 cameraSelector,
                 imageCapture,
                 preview);
+        
+        ResolutionInfo ri = preview.getResolutionInfo();
+        
+        try {
+            Utils.outputWidth = ri.getResolution().getHeight();
+            Utils.outputHeight = ri.getResolution().getWidth();
+        } catch(NullPointerException e) {
+            Log.d(TAG, "M/bindPreview: ResolutionInfo is null");
+            Log.d(TAG, "M/bindPreview: " + e.getMessage());
+            
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/git/android-workspace/bboxPhotoApp/app/src/main/res/drawable-anydpi/ic_action_adjust_bbox.xml" value="0.359" />
         <entry key="..\:/git/android-workspace/bboxPhotoApp/app/src/main/res/drawable-anydpi/ic_action_open_menu.xml" value="0.29" />
         <entry key="..\:/git/android-workspace/bboxPhotoApp/app/src/main/res/drawable-anydpi/ic_action_take_photo.xml" value="0.29" />
         <entry key="..\:/git/android-workspace/bboxPhotoApp/app/src/main/res/layout/activity_camera.xml" value="0.36666666666666664" />

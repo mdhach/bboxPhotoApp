@@ -70,30 +70,31 @@ public final class JSONManager {
                     sb.append(line).append("\n");
                     line = br.readLine();
                 }
-
                 br.close(); // close buffered reader
 
-                strToJSON = sb.toString(); // saves parsed JSON file to string object
+                // init JSONMain with the string parsed from the buffered reader
+                strToJSON = sb.toString();
+                JSONMain = new JSONObject(strToJSON);
                 
-                JSONMain = new JSONObject(strToJSON); // init main with file
-                
-                Log.d(TAG, "M/initJSON: JSONMain instantiated.");
+                Log.d(TAG, "M/initJSON: Instantiated JSONMain with JSONFile.");
                 
                 // set image button uri if not set
                 if(headImageUri == null) {
                     initHeadImageUri(context);
                 }
             } catch(JSONException | IOException e) {
-                // file exists but is likely empty...
-                JSONMain = new JSONObject();
-                
                 Log.d(TAG, "M/initJSON: JSONException or IOException thrown...");
                 Log.d(TAG, "M/initJSON: " + e.getMessage());
+                Log.d(TAG, "M/initJSON: JSONFile exists but is likely to be empty...");
+                Log.d(TAG, "M/initJSON: Instantiating new JSONMain...");
+                
+                JSONMain = new JSONObject();
             }
         } else {
-            JSONMain = new JSONObject();
             Log.d(TAG, "M/initJSON: JSONFile does not exist...");
-            Log.d(TAG, "M/initJSON: Instantiating JSONMain...");
+            Log.d(TAG, "M/initJSON: Instantiating new JSONMain...");
+            
+            JSONMain = new JSONObject();
         }
     }
 
@@ -346,12 +347,24 @@ public final class JSONManager {
     }
 
     /**
-     * Checks if either JSONFile exists or JSONMain is null.
+     * Reinitializes JSONManager components based on resume situation in main activity.
      * 
-     * @return true if JSONFile and JSONMain exists; false otherwise.
+     * @param context current context
      */
-    public static boolean isMainAlive() {
-        return JSONFile.exists() && JSONMain != null;
+    public static void resume(Context context) {
+        if(!JSONFile.exists() && JSONMain != null) {
+            Log.d(TAG, "M/resume: No JSONFile...");
+            Log.d(TAG, "M/resume: Writing JSONMain to file...");
+            saveJSONAsFile();
+        } else if(!JSONFile.exists() && JSONMain == null) {
+            Log.d(TAG, "M/resume: No JSONFile and JSONMain is null...");
+            Log.d(TAG, "M/resume: Reinitializing...");
+            initJSON(context);
+        }else if(JSONFile.exists() && JSONMain == null) {
+            Log.d(TAG, "M/resume: JSONMain is null...");
+            Log.d(TAG, "M/resume: Reinitializing...");
+            initJSON(context);
+        }
     }
 
     /**

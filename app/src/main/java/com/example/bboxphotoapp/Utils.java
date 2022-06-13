@@ -44,6 +44,12 @@ public final class Utils {
     private static final int CAMERA_REQUEST_CODE = 10;
     private static final int STORAGE_REQUEST_CODE = 20;
 
+    public static int displayWidth;
+    public static int displayHeight;
+
+    public static int outputWidth;
+    public static int outputHeight;
+
     /**
      * Returns the activity of a given context.
      *
@@ -128,10 +134,10 @@ public final class Utils {
                             func.run();
                             Log.d(TAG, "M/addConfirmDialog: request success");
                         } else {
-                            Log.d(TAG, "M/addConfirmDialog: incorrect bundleKey");
+                            Log.d(TAG, "M/addConfirmDialog: invalid bundleKey");
                         }
                     } else {
-                        Log.d(TAG, "M/addConfirmDialog: incorrect requestKey");
+                        Log.d(TAG, "M/addConfirmDialog: invalid requestKey");
                     }
                     activity.getSupportFragmentManager().clearFragmentResultListener(requestKey);
                 });
@@ -182,10 +188,10 @@ public final class Utils {
                             func.run();
                             Log.d(TAG, "M/addConfirmDialog: request success");
                         } else {
-                            Log.d(TAG, "M/addConfirmDialog: incorrect bundleKey");
+                            Log.d(TAG, "M/addConfirmDialog: invalid bundleKey");
                         }
                     } else {
-                        Log.d(TAG, "M/addConfirmDialog: incorrect requestKey");
+                        Log.d(TAG, "M/addConfirmDialog: invalid requestKey");
                     }
                     activity.getSupportFragmentManager().clearFragmentResultListener(requestKey);
                 });

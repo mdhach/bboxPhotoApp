@@ -80,6 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
                     + "\n\nSave Path: " + PrefsManager.getDefaultSaveLocation()
                     + "\n\nFile Name: " + PrefsManager.getDefaultSaveName() 
                     + "\n\nImage Directory: " + PrefsManager.getDefaultImageDir();
+            
             // zip files on confirmation
             Runnable r = PrefsManager::reset;
 
@@ -108,6 +109,8 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .setFragmentResultListener(requestKey, this, (key, bundle) -> {
                     if(key.equals(requestKey)) {
+                        Log.d(TAG, "M/addSaveLocDialogFrag: request success");
+                        
                         // get path result from dialog and set value in SharedPreferences
                         String path = bundle.getString(bundleKey);
                         PrefsManager.setValue(PrefsManager.saveLocKey, path);
@@ -116,9 +119,12 @@ public class SettingsActivity extends AppCompatActivity {
                         
                         // set info text view to relative path
                         setInfoText();
-                        
-                        getSupportFragmentManager().clearFragmentResultListener(requestKey);
+
+                        Toast.makeText(this, "New path set!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.d(TAG, "M/addSaveLocDialogFrag: invalid requestKey");
                     }
+                    getSupportFragmentManager().clearFragmentResultListener(requestKey);
                 });
     }
 
@@ -146,7 +152,7 @@ public class SettingsActivity extends AppCompatActivity {
             // NOTE: a file may still be created even if the zip function fails to complete execution
             Toast.makeText(this, "Failed to save images to: " + saveLocation, Toast.LENGTH_SHORT).show();
 
-            Log.d(TAG, "M/zipFiles: zipManager.zip() function returned FALSE; please refer to logs in ZipManager.class");
+            Log.d(TAG, "M/zipFiles: zipManager.zip() function returned false");
         }
     }
 

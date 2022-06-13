@@ -30,6 +30,11 @@ public class BboxView extends AppCompatImageView {
     // bbox dimensions
     private int[] topLeft = new int[2];
     private int[] bottomRight = new int[2];
+    
+    private int maxWidth;
+    private int maxHeight;
+    
+    private final int padding = 8;
 
     public BboxView(@NonNull Context context) {
         super(context);
@@ -78,7 +83,9 @@ public class BboxView extends AppCompatImageView {
         super.onSizeChanged(w, h, oldw, oldh);
         
         // init bounding box dimensions; default dims based on canvas
-        setTopLeft(w/4, h/4);
+        maxWidth = w;
+        maxHeight = h;
+        setTopLeft(maxWidth/4, maxHeight/4);
         setBottomRight((int)(w * 0.75), (int)(h * 0.75));
     }
 
@@ -105,6 +112,10 @@ public class BboxView extends AppCompatImageView {
         this.bottomRight[1] = y;
         postInvalidate();
     }
+    
+    public int getMaxWidth() { return this.maxWidth - padding; }
+    
+    public int getMaxHeight() { return this.maxHeight - padding; }
 
     /**
      * Returns the top left coordinate as an integer array (dim: int[2]).
@@ -127,8 +138,22 @@ public class BboxView extends AppCompatImageView {
      */
     public int[] getBbox() {
         int[] bbox = new int[topLeft.length + bottomRight.length];
+        
+        // stack values from topLeft and bottomRight into bbox
         System.arraycopy(topLeft, 0, bbox, 0, topLeft.length);
         System.arraycopy(bottomRight, 0, bbox, topLeft.length, bottomRight.length);
+        
+        // output resolution scaling
+        double width = Utils.outputWidth * 1.0 / Utils.displayWidth;
+        double height = Utils.outputHeight * 1.0 / Utils.displayHeight;
+
+        // apply output resolution scaling to the coordinates
+        for(int i = 0; i < bbox.length; i++) {
+            bbox[i] = i % 2 == 0 ?
+                    (int)(bbox[i] * width)
+                    : (int)(bbox[i] * height);
+        }
+        
         return bbox;
     }
 }

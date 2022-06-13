@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -39,6 +40,7 @@ public final class PrefsManager {
         dSaveNameVal = activity.getString(R.string.default_save_name_val);
         dImgDirVal = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath();
         
+        // initialize default pairs
         initDefaultPairs(saveLocKey, dSaveLocVal);
         initDefaultPairs(saveNameKey, dSaveNameVal);
         initDefaultPairs(imgDirKey, dImgDirVal);

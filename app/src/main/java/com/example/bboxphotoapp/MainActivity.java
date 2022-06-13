@@ -4,6 +4,7 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DisplayMetrics display = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(display);
+        Utils.displayWidth = display.widthPixels;
+        Utils.displayHeight = display.heightPixels;
 
         // init SharedPreferences manager
         PrefsManager.init(this);
@@ -140,11 +146,7 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // check if JSONFile and JSONMain still exists
-        if(!JSONManager.isMainAlive()) {
-            Log.d(TAG, "M/onResume: JSONFile and/or JSONMain are null.");
-            Log.d(TAG, "M/onResume: Reinstantiating JSONFile and/or JSONMain...");
-            JSONManager.initJSON(this);
-        }
+        JSONManager.resume(this);
     }
 
     /**
@@ -240,14 +242,16 @@ public class MainActivity extends AppCompatActivity {
                         // boundaries when repositioning image and resizing bounding box
                         if(img == 0) {
                             // top left image cannot pass bottom right image
-                            if(x < imgViewBottomRight.getX()+xCenter && y < imgViewBottomRight.getY()+yCenter) {
+                            if(x < imgViewBottomRight.getX()+xCenter && y < imgViewBottomRight.getY()+yCenter
+                            && x < bboxView.getMaxWidth() && y < bboxView.getMaxHeight()) {
                                 bboxView.setTopLeft(x, y);
                                 imgViewTopLeft.setX(x-xCenter);
                                 imgViewTopLeft.setY(y-yCenter);
                             }
                         } else if(img == 1) {
                             // bottom right image cannot pass top left image
-                            if(x > imgViewTopLeft.getX()+xCenter && y > imgViewTopLeft.getY()+yCenter) {
+                            if(x > imgViewTopLeft.getX()+xCenter && y > imgViewTopLeft.getY()+yCenter
+                                    && x < bboxView.getMaxWidth() && y < bboxView.getMaxHeight()) {
                                 bboxView.setBottomRight(x, y);
                                 imgViewBottomRight.setX(x-xCenter);
                                 imgViewBottomRight.setY(y-yCenter);
