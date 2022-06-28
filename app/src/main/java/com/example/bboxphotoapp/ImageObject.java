@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 
 /**
- * Image object.
+ * Image model object
  *
  * Stores information regarding an image with their corresponding:
  *

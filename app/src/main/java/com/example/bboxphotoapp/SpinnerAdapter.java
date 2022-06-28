@@ -63,9 +63,11 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
         spnItemName.setText(text);
         
         spnItemDel.setOnClickListener(view -> {
-            if(!list.isEmpty()) {
+            if(list.size() > 0) {
                 list.remove(position);
                 notifyDataSetChanged();
+            } else {
+                Log.d(TAG, "M/getCustomDropDownView: Array requires at least one value!");
             }
         });
 

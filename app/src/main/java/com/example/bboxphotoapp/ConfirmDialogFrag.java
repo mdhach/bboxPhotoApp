@@ -2,7 +2,9 @@ package com.example.bboxphotoapp;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,13 +28,24 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
 
     private String requestKey; 
     private String bundleKey;
+    private String inputKey;
     
     private Bundle bundle;
+    
+    private boolean requireInput;
+    private EditText input;
     
     public ConfirmDialogFrag(String title, String message) {
         this.title = title;
         this.message = message;
         this.bundle = new Bundle();
+    }
+    
+    public ConfirmDialogFrag(String title, String message, boolean requireInput) {
+        this.title = title;
+        this.message = message;
+        this.bundle = new Bundle();
+        this.requireInput = requireInput;
     }
     
     @NonNull
@@ -42,9 +55,16 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
 
         requestKey = getString(R.string.rq_confirmation);
         bundleKey = getString(R.string.bn_confirmation);
+        inputKey = getString(R.string.bn_dialog_input);
         
         builder.setTitle(title);
         builder.setMessage(message);
+        
+        if(requireInput) {
+            input = new EditText(requireContext());
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(input);
+        }
         
         builder.setNegativeButton("Cancel", ((dialogInterface, i) -> {
             bundle.putBoolean(bundleKey, false);
@@ -55,6 +75,9 @@ public class ConfirmDialogFrag extends AppCompatDialogFragment {
         
         builder.setPositiveButton("Confirm", ((dialogInterface, i) -> {
             bundle.putBoolean(bundleKey, true);
+            
+            if(requireInput) { bundle.putString(inputKey, input.getText().toString()); }
+            
             getParentFragmentManager().setFragmentResult(requestKey, bundle);
             
             Log.d(TAG, "M/onCreateDialog: action confirm");

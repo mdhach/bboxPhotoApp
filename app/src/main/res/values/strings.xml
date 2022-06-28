@@ -41,5 +41,6 @@
     <!-- Bundle Keys (bn) -->
     <string name="bn_confirmation">CONFIRMATION_BUNDLE_KEY</string>
     <string name="bn_save_location">SAVE_LOCATION_BUNDLE_KEY</string>
+    <string name="bn_dialog_input">INPUT_BUNDLE_KEY</string>
 
 </resources>

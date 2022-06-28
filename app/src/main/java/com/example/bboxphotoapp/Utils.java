@@ -1,32 +1,24 @@
 package com.example.bboxphotoapp;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
+import android.widget.ArrayAdapter;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 
-import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Static methods that may be used globally on the application.
@@ -132,6 +124,42 @@ public final class Utils {
                     if(key.equals(requestKey)) {
                         if(bundle.getBoolean(bundleKey)) {
                             func.run();
+                            Log.d(TAG, "M/addConfirmDialog: request success");
+                        } else {
+                            Log.d(TAG, "M/addConfirmDialog: invalid bundleKey");
+                        }
+                    } else {
+                        Log.d(TAG, "M/addConfirmDialog: invalid requestKey");
+                    }
+                    activity.getSupportFragmentManager().clearFragmentResultListener(requestKey);
+                });
+    }
+
+    /**
+     * Creates a confirmation dialog box that requests an input and adds to it to a given
+     * ArrayAdapter object.
+     *
+     * @param context current context
+     * @param title name of the dialog pop-up box
+     * @param message display text
+     * @param adapter the ArrayAdapter that receives input
+     */
+    public static void addConfirmDialog(Context context, String title, String message, ArrayAdapter<String> adapter) {
+        ConfirmDialogFrag dialogFrag = new ConfirmDialogFrag(title, message, true);
+        FragmentActivity activity = (FragmentActivity) getActivity(context);
+        dialogFrag.show(activity.getSupportFragmentManager(), "ConfirmDialogFrag");
+
+        String requestKey = context.getString(R.string.rq_confirmation);
+        String bundleKey = context.getString(R.string.bn_confirmation);
+        String inputKey = context.getString(R.string.bn_dialog_input);
+
+        activity.getSupportFragmentManager()
+                .setFragmentResultListener(requestKey, activity, (key, bundle) -> {
+                    if(key.equals(requestKey)) {
+                        if(bundle.getBoolean(bundleKey)) {
+                            Log.d(TAG, "M/addConfirmDialog: " + bundle.getString(inputKey));
+                            adapter.add(bundle.getString(inputKey));
+                            adapter.notifyDataSetChanged();
                             Log.d(TAG, "M/addConfirmDialog: request success");
                         } else {
                             Log.d(TAG, "M/addConfirmDialog: invalid bundleKey");

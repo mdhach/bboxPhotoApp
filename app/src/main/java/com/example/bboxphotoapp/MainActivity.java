@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
         // init add class button
         btnAddClass.setOnClickListener(view -> {
-            createDialog();
+            Utils.addConfirmDialog(this, "Confirm Action", "Add a class", spAdapter);
         });
         
         // view images activity button listener
@@ -194,8 +194,10 @@ public class MainActivity extends AppCompatActivity {
         imgViewBottomRight.setY(bottomRight[1] - yCenter);
 
         // init listeners on image views; allows user to readjust bbox size
-        imgViewTopLeft.setOnTouchListener(getOtl(0));
-        imgViewBottomRight.setOnTouchListener(getOtl(1));
+//        imgViewTopLeft.setOnTouchListener(getOtl(0));
+//        imgViewBottomRight.setOnTouchListener(getOtl(1));
+        imgViewTopLeft.setOnTouchListener(new AdjustOnTouch(imgViewTopLeft, imgViewBottomRight, bboxView, 0));
+        imgViewBottomRight.setOnTouchListener(new AdjustOnTouch(imgViewTopLeft, imgViewBottomRight, bboxView, 1));
     }
 
     /**
@@ -284,45 +286,5 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         };
-    }
-
-    /**
-     * Creates a dialog box that allows the user to add a new class to the
-     * class spinner object.
-     * 
-     */
-    private void createDialog() {
-        dialogBuilder = new AlertDialog.Builder(this);
-        final View dialogView = getLayoutInflater().inflate(R.layout.class_prompt, null);
-        
-        // init dialog views
-        editClassText = dialogView.findViewById(R.id.addClassText);
-        btnAddButton = dialogView.findViewById(R.id.addButton);
-        btnCancelButton = dialogView.findViewById(R.id.cancelButton);
-        
-        dialogBuilder.setView(dialogView); // set the view for the dialog layout
-        dialog = dialogBuilder.create(); // create dialog object
-        dialog.show();
-        
-        // adds a user-defined string to the list contained by the Spinner Adapter object
-        btnAddButton.setOnClickListener(view -> {
-            // get string value
-            String newClass = String.valueOf(editClassText.getText());
-            
-            // add string to Spinner Adapter
-            spAdapter.add(newClass);
-            
-            // refresh adapter list
-            spAdapter.notifyDataSetChanged();
-            
-            // dismiss dialog box
-            dialog.dismiss();
-        });
-        
-        // allows user to cancel dialog action
-        btnCancelButton.setOnClickListener(view -> {
-            // dismiss dialog box
-            dialog.dismiss();
-        });
     }
 }
